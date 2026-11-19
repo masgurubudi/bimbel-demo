@@ -365,11 +365,65 @@ function meetingCard(m){
 }
 function renderAdminData(){
   var mh=mentors.map(function(m){ return '<tr><td><b>'+esc(m.name)+'</b></td><td>'+esc(m.mapel)+'</td><td>'+esc(m.dob)+'</td><td>'+esc(m.wa)+'</td></tr>'; }).join('');
-  var sh=students.map(function(s){ var p=parentById(s.parent); return '<tr><td><b>'+esc(s.name)+'</b></td><td>'+esc(s.kelas)+'</td><td>'+esc(p.name)+'</td><td>'+esc(p.wa)+'</td></tr>'; }).join('');
+  var sh=students.map(function(s){ var p=parentById(s.parent); return '<tr><td><b>'+esc(s.name)+'</b></td><td>'+esc(s.kelas)+'</td><td>'+esc(p.name)+'</td><td>'+esc(p.wa)+'</td><td>'+esc(s.hubungan||'—')+'</td></tr>'; }).join('');
   var ch=classes.map(function(c){ return '<div class="item"><h4>'+esc(c.name)+'</h4><p>Mentor: '+esc(mentorById(c.mentor).name)+' · 🕒 '+esc(c.jadwal)+'</p><p>Anggota: '+c.members.map(function(id){return esc(studentById(id).name)}).join(', ')+'</p></div>'; }).join('');
-  $('tabContent').innerHTML='<div class="card"><h3>👩‍🏫 Mentor (8 — satu per mapel)</h3><table><thead><tr><th>Nama</th><th>Mapel</th><th>Tanggal Lahir</th><th>WA</th></tr></thead><tbody>'+mh+'</tbody></table></div>'
-  +'<div class="card"><h3>🧒 Siswa &amp; Orangtua (10 siswa · 7 orangtua)</h3><table><thead><tr><th>Siswa</th><th>Kelas</th><th>Orangtua</th><th>WA Orangtua</th></tr></thead><tbody>'+sh+'</tbody></table><p class="hint">Ibu Ratna Dewi memiliki 2 anak (Sabrina Zahra &amp; Zamir Akbar) dan Bapak Wijaya Kusuma memiliki 3 anak (Kirana Dewi, Bima Arya &amp; Luna Cantika) — nomor WA yang sama mengelompokkan mereka sebagai satu keluarga.</p></div>'
+  $('tabContent').innerHTML='<div class="card"><h3>👩‍🏫 Mentor ('+mentors.length+')</h3><table><thead><tr><th>Nama</th><th>Mapel</th><th>Tanggal Lahir</th><th>WA</th></tr></thead><tbody>'+mh+'</tbody></table>'
+  +'<h3 style="margin:22px 0 0">➕ Tambah Mentor</h3>'
+  +'<div class="grid2"><div><label for="nmName">Nama</label><input type="text" id="nmName" placeholder="Contoh: Budi Santoso, S.Pd."></div>'
+  +'<div><label for="nmMapel">Mata Pelajaran</label><input type="text" id="nmMapel" placeholder="Contoh: Matematika"></div>'
+  +'<div><label for="nmDob">Tanggal Lahir (wajib)</label><input type="date" id="nmDob"></div>'
+  +'<div><label for="nmWa">Nomor HP/WA</label><input type="text" id="nmWa" inputmode="tel" placeholder="Contoh: 0812-3456-7890"></div></div>'
+  +'<p class="hint">Tanggal lahir wajib diisi — pada aplikasi sebenarnya, PIN mentor adalah tanggal lahirnya dalam format DDMMYY.</p>'
+  +'<button class="btn" onclick="addMentor()">Tambah Mentor</button></div>'
+  +'<div class="card"><h3>🧒 Siswa &amp; Orangtua ('+students.length+' siswa · '+parents.length+' orangtua)</h3><table><thead><tr><th>Siswa</th><th>Kelas</th><th>Orangtua</th><th>WA Orangtua</th><th>Hubungan</th></tr></thead><tbody>'+sh+'</tbody></table><p class="hint">Ibu Ratna Dewi memiliki 2 anak (Sabrina Zahra &amp; Zamir Akbar) dan Bapak Wijaya Kusuma memiliki 3 anak (Kirana Dewi, Bima Arya &amp; Luna Cantika) — nomor WA yang sama mengelompokkan mereka sebagai satu keluarga.</p>'
+  +'<h3 style="margin:22px 0 0">➕ Tambah Siswa</h3>'
+  +'<div class="grid2"><div><label for="nsName">Nama siswa</label><input type="text" id="nsName" placeholder="Contoh: Rizky Pratama"></div>'
+  +'<div><label for="nsKelas">Kelas</label><input type="text" id="nsKelas" placeholder="Contoh: 9 SMP"></div>'
+  +'<div><label for="nsParent">Nama orangtua</label><input type="text" id="nsParent" placeholder="Contoh: Ibu Sari Wulandari"></div>'
+  +'<div><label for="nsWa">Nomor HP/WA orangtua (wajib)</label><input type="text" id="nsWa" inputmode="tel" placeholder="Contoh: 081234567890"></div>'
+  +'<div><label for="nsRel">Hubungan dengan siswa</label><select id="nsRel"><option value="Ayah">Ayah</option><option value="Ibu">Ibu</option><option value="Kakak">Kakak</option><option value="Wali">Wali</option><option value="Lainnya">Lainnya</option></select></div></div>'
+  +'<p class="hint">Nomor HP/WA orangtua wajib diisi — pada aplikasi sebenarnya, PIN orangtua adalah 4 digit terakhir nomor ini. Bila nomor WA sama dengan orangtua yang sudah terdaftar, siswa baru otomatis tergabung dalam keluarga yang sama.</p>'
+  +'<button class="btn" onclick="addStudent()">Tambah Siswa</button></div>'
   +'<div class="card"><h3>🏫 Kelas</h3>'+ch+'</div>';
+}
+function fmtDob(v){
+  var p=v.split('-'); if(p.length!==3) return v;
+  var bln=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return parseInt(p[2],10)+' '+bln[parseInt(p[1],10)-1]+' '+p[0];
+}
+function refreshLoginSelects(){
+  var ms=$('mentorSel'); var mv=ms.value;
+  ms.innerHTML=mentors.map(function(m){ return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.mapel)+'</option>'; }).join('');
+  if(mv && mentorById(mv)) ms.value=mv;
+  var os=$('ortuSel'); var ov=os.value;
+  os.innerHTML=students.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'; }).join('');
+  if(ov && studentById(ov)) os.value=ov;
+}
+function addMentor(){
+  var name=($('nmName').value||'').trim(), mapel=($('nmMapel').value||'').trim(), dob=$('nmDob').value, wa=($('nmWa').value||'').trim();
+  if(!name){ toast('Isi nama mentor dulu.'); return; }
+  if(!mapel){ toast('Isi mata pelajaran mentor dulu.'); return; }
+  if(!dob){ toast('Tanggal lahir wajib diisi — PIN mentor adalah tanggal lahir format DDMMYY.'); return; }
+  if(!wa){ toast('Isi nomor HP/WA mentor dulu.'); return; }
+  mentors.push({id:'M'+Date.now(),name:name,mapel:mapel,dob:fmtDob(dob),wa:wa});
+  refreshLoginSelects();
+  toast('Mentor '+name+' ditambahkan — langsung tampil di tabel Data Induk dan di pilihan masuk Mentor.');
+  renderAdminData();
+}
+function addStudent(){
+  var name=($('nsName').value||'').trim(), kelas=($('nsKelas').value||'').trim(), pname=($('nsParent').value||'').trim(), wa=($('nsWa').value||'').trim(), rel=$('nsRel').value;
+  if(!name){ toast('Isi nama siswa dulu.'); return; }
+  if(!kelas){ toast('Isi kelas siswa dulu.'); return; }
+  if(!pname){ toast('Isi nama orangtua dulu.'); return; }
+  if(!wa){ toast('Nomor HP/WA orangtua wajib diisi — PIN orangtua adalah 4 digit terakhir nomor ini.'); return; }
+  var digits=wa.replace(/\D/g,'');
+  var par=null;
+  for(var i=0;i<parents.length;i++){ if(parents[i].wa.replace(/\D/g,'')===digits){ par=parents[i]; break; } }
+  if(!par){ par={id:'P'+Date.now(),name:pname,wa:wa}; parents.push(par); }
+  students.push({id:'S'+Date.now(),name:name,kelas:kelas,parent:par.id,hubungan:rel});
+  refreshLoginSelects();
+  toast('Siswa '+name+' ditambahkan — langsung tampil di tabel Data Induk dan di pilihan masuk Orangtua.');
+  renderAdminData();
 }
 function renderPinInfo(){
   $('tabContent').innerHTML='<div class="notice"><strong>Mode demo:</strong> PIN apa pun diterima untuk semua peran, supaya demo mudah dicoba.</div><div class="card"><h3>🔐 Aturan PIN pada aplikasi sebenarnya</h3><p>• <b>Admin:</b> tiap admin punya nama &amp; PIN sendiri (bisa lebih dari satu admin).<br>• <b>Mentor:</b> PIN = tanggal lahir format DDMMYY — karena itu data mentor wajib ada tanggal lahir.<br>• <b>Orangtua:</b> PIN = 4 digit terakhir nomor HP/WA orangtua yang terdaftar — karena itu data orangtua wajib ada nomor HP/WA. Nomornya tidak diketik saat masuk; orangtua cukup memilih nama anak lalu memasukkan PIN-nya.</p></div>';
@@ -498,12 +552,7 @@ function renderOrtuInvoices(){
 }
 
 /* init */
-(function(){
-  var ms=$('mentorSel');
-  ms.innerHTML=mentors.map(function(m){ return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.mapel)+'</option>'; }).join('');
-  var os=$('ortuSel');
-  os.innerHTML=students.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'; }).join('');
-})();
+(function(){ refreshLoginSelects(); })();
 </script>
 </body>
 </html>
