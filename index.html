@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:,"/>
+<title>Aplikasi Bimbel Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f7f6; --card:#ffffff; --ink:#13201d; --muted:#5b6f6a; --line:#dce7e3;
+  --teal:#0f766e; --teal-dark:#0b4f4a; --teal-soft:#e6f4f1; --gold:#c99a1b; --gold-soft:#fdf3d7;
+  --red:#b42318; --red-soft:#fdecea; --amber:#b54708; --amber-soft:#fef3e2; --green:#067647; --green-soft:#e6f4ea;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0e1514; --card:#17211f; --ink:#e8f0ee; --muted:#9db3ae; --line:#2a3a37; --teal-soft:#12332f; --gold-soft:#332a10; --red-soft:#3a1714; --amber-soft:#38260f; --green-soft:#123324; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+a{color:var(--teal)}
+button,[role="button"],select,input,textarea{font:inherit}
+button,select,input:not([type="radio"]){min-height:44px}
+.wrap{max-width:768px;margin:0 auto;padding:0 16px 48px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(155deg,#08332d 0%,#0f766e 55%,#159a83 100%);color:#fff;padding:44px 0 64px;margin-bottom:0}
+.hero .wrap{padding-bottom:0}
+
+
+.hero h1{font-size:1.9rem;margin:28px 0 0;line-height:1.3;font-weight:800}
+.hero-sub{display:block;margin-top:6px;font-size:1.08rem;font-weight:600;line-height:1.55;color:rgba(255,255,255,.92)}
+.hero-date{margin:16px 0 0;font-size:.9rem;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:7px}
+.hero-date svg{flex:none}
+.hero-brand{display:flex;align-items:center;gap:12px}
+.hero-brand .cap{width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.20);border-radius:14px}
+.hero-brand .cap svg{width:27px;height:27px}
+.hero-brand strong{display:block;font-size:1.1rem;line-height:1.25}
+.hero-brand span{font-size:.88rem;color:rgba(255,255,255,.75)}
+.deco{position:absolute;border-radius:50%;pointer-events:none}
+.deco-a{width:288px;height:288px;right:-80px;top:-96px;border:26px solid rgba(255,255,255,.10)}
+.deco-b{width:256px;height:256px;left:-64px;bottom:-128px;border:22px solid rgba(255,255,255,.07)}
+.feature-strip{position:relative;z-index:2;margin-top:-36px;display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 32px -20px rgba(8,51,45,.45);overflow:hidden}
+.feature-strip>div{padding:16px 8px;text-align:center}
+.feature-strip>div+div{border-left:1px solid var(--line)}
+.f-ic{display:flex;width:44px;height:44px;margin:0 auto;border-radius:50%;align-items:center;justify-content:center}
+.f-ic svg{width:22px;height:22px}
+.f-teal{background:rgba(15,118,110,.12)}
+.f-amber{background:rgba(245,197,66,.20)}
+.f-sky{background:rgba(14,165,233,.12)}
+.feature-strip strong{display:block;margin-top:8px;font-size:.9rem}
+.feature-strip .f-sub{font-size:.72rem;color:var(--muted)}
+
+
+
+.credit-hero{margin:12px 0 0;font-size:.9rem}
+.credit-hero a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.card h2,.card h3{margin-top:0}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:700px){.role-grid{grid-template-columns:1fr}}
+.role-btn{text-align:left;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;width:100%}
+.role-btn.active{border-color:var(--teal);background:var(--teal-soft)}
+.role-btn .ic{font-size:1.5rem}
+.role-btn strong{display:block;font-size:1.05rem;margin:6px 0 2px}
+.role-btn span{color:var(--muted);font-size:.88rem}
+label{font-weight:700;font-size:.9rem;display:block;margin:12px 0 6px}
+input[type="text"],input[type="password"],input[type="date"],input[type="number"],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+textarea{min-height:74px;resize:vertical}
+.btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:12px 20px;font-weight:800;cursor:pointer;width:100%}
+.btn:hover{background:var(--teal-dark)}
+.btn.secondary{background:transparent;color:var(--teal);border:2px solid var(--teal);width:auto;padding:8px 16px}
+.btn.small{width:auto;padding:8px 14px;font-size:.88rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{color:var(--muted);font-size:.88rem}
+.pick-list{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
+.pick-item{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;background:var(--card);border:none;border-bottom:1px solid var(--line);padding:12px;cursor:pointer;color:var(--ink)}
+.pick-item:last-child{border-bottom:none}
+.pick-item.sel{background:var(--teal-soft)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+.pill.lunas{background:var(--green-soft);color:var(--green)}
+.pill.sebagian{background:var(--amber-soft);color:var(--amber)}
+.pill.belum{background:var(--red-soft);color:var(--red)}
+.pill.hadir{background:var(--green-soft);color:var(--green)}
+.pill.izin,.pill.sakit{background:var(--amber-soft);color:var(--amber)}
+.pill.alpa{background:var(--red-soft);color:var(--red)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:6px}
+.topbar .who{display:flex;gap:12px;align-items:center}
+.avatar{width:46px;height:46px;border-radius:12px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex:none}
+.credit-line{text-align:center;font-size:.85rem;color:var(--muted);margin:8px 0 14px}
+.credit-line a{font-weight:700}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 16px;font-weight:700;cursor:pointer;min-height:44px}
+.tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.stat b{font-size:1.5rem;display:block;color:var(--teal-dark)}
+@media (prefers-color-scheme: dark){.stat b{color:#5eead4}}
+.stat span{color:var(--muted);font-size:.85rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.item{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--card)}
+.item h4{margin:0 0 4px}
+.item p{margin:2px 0;color:var(--muted);font-size:.9rem}
+.item p b{color:var(--ink)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 16px;font-weight:700;cursor:pointer;min-height:44px}
+.chip.active{background:var(--gold-soft);border-color:var(--gold)}
+.att-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.att-row:last-child{border-bottom:none}
+.att-opts{display:flex;gap:6px;flex-wrap:wrap}
+.att-opts label{margin:0;font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;cursor:pointer;min-height:36px}
+.notice{background:#fffbeb;border:1px solid #fcd34d;border-radius:16px;padding:16px;font-size:.92rem;margin:20px 0 4px;color:#78350f}
+.order{background:linear-gradient(135deg,#0b4f4a,#0f766e);color:#fff;border-radius:var(--radius);padding:22px;margin-top:8px}
+.order a.btnlink{display:inline-block;background:#f5c542;color:#3a2c00;font-weight:800;padding:12px 20px;border-radius:10px;text-decoration:none;margin-top:10px}
+.order a.ghost{display:inline-block;color:#fff;font-weight:700;margin-left:14px}
+.hidden{display:none!important}
+.toast{background:var(--teal-dark);color:#fff;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-weight:600}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:10px 0 30px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+@media(max-width:640px){ table,thead,tbody,tr,th,td{display:block} thead{display:none} td{border-bottom:none;padding:3px 8px} tr{border-bottom:1px solid var(--line);padding:8px 0} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="deco deco-a" aria-hidden="true"></div>
+  <div class="deco deco-b" aria-hidden="true"></div>
+  <div class="wrap hero-inner">
+    <div class="hero-brand">
+      <span class="cap"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg></span>
+      <div><strong>Aplikasi Bimbel</strong><span>Bimbingan Belajar</span></div>
+    </div>
+    <h1>Selamat datang.<span class="hero-sub">Absensi, laporan pertemuan, dan tagihan — semuanya terpantau rapi dalam satu tempat.</span></h1>
+    <p class="hero-date"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg> <span id="todayDate"></span></p>
+    <p class="credit-hero"><a href="https://rasa.web.id" target="_blank" rel="noopener">Design by rasa.web.id</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="feature-strip">
+    <div><span class="f-ic f-teal"><svg viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span><strong>Absensi</strong><span class="f-sub">Siswa &amp; mentor</span></div>
+    <div><span class="f-ic f-amber"><svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span><strong>Laporan + Foto</strong><span class="f-sub">Tiap pertemuan</span></div>
+    <div><span class="f-ic f-sky"><svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span><strong>Tagihan</strong><span class="f-sub">Status pembayaran</span></div>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <section id="loginView">
+    <div class="notice"><strong>Versi Demo — data contoh</strong><br>Semua nama mentor dan siswa di sini adalah data contoh untuk mencoba aplikasi. Pilih peran dan nama, lalu masukkan PIN angka apa saja — PIN apa pun diterima.</div>
+
+    <h2 style="margin:4px 0 2px">Masuk sebagai…</h2>
+    <p class="hint" style="margin:0 0 12px">Pilih peran Anda untuk melanjutkan.</p>
+    <div class="role-grid">
+      <button class="role-btn active" data-role="admin" onclick="pickRole('admin')"><span class="ic">🗂️</span><strong>Pengelola / Admin</strong><span>Kelola data induk, pertemuan, absensi, dan tagihan semua siswa.</span></button>
+      <button class="role-btn" data-role="mentor" onclick="pickRole('mentor')"><span class="ic">📖</span><strong>Mentor</strong><span>Isi absensi dan laporan pertemuan untuk kelas yang diampu.</span></button>
+      <button class="role-btn" data-role="ortu" onclick="pickRole('ortu')"><span class="ic">👨‍👩‍👧</span><strong>Orangtua</strong><span>Pantau kehadiran, laporan belajar, dan tagihan anak Anda.</span></button>
+    </div>
+
+    <div class="card">
+      <!-- Admin form -->
+      <div id="form-admin">
+        <label for="adminSel">Nama Admin</label>
+        <select id="adminSel"><option value="Admin Demo">Admin Demo — Pengelola Bimbel</option></select>
+        <label for="adminPin">PIN</label>
+        <input type="password" id="adminPin" inputmode="numeric" placeholder="Masukkan PIN apa saja — demo menerima semua PIN" autocomplete="off">
+      </div>
+      <!-- Mentor form -->
+      <div id="form-mentor" class="hidden">
+        <label for="mentorSel">Nama Mentor</label>
+        <select id="mentorSel"></select>
+        <label for="mentorPin">PIN</label>
+        <input type="password" id="mentorPin" inputmode="numeric" placeholder="Masukkan PIN apa saja — demo menerima semua PIN" autocomplete="off">
+      </div>
+      <!-- Ortu form -->
+      <div id="form-ortu" class="hidden">
+        <label for="ortuSearch">Nama anak</label>
+        <input type="text" id="ortuSearch" placeholder="Ketik 1–3 huruf nama anak Anda…" autocomplete="off" oninput="renderOrtuPick()">
+        <div id="ortuPick" class="pick-list"></div>
+        <p class="hint" id="ortuSelInfo">Belum ada nama terpilih.</p>
+        <label for="ortuPin">PIN</label>
+        <input type="password" id="ortuPin" inputmode="numeric" placeholder="Masukkan PIN apa saja — demo menerima semua PIN" autocomplete="off">
+      </div>
+      <p id="loginError" style="color:var(--red);font-weight:700" class="hidden"></p>
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn" onclick="doLogin()">Masuk Aplikasi →</button>
+      <p class="hint" id="loginHint" style="text-align:center;margin-bottom:0">Demo: PIN apa pun diterima. Coba juga masuk sebagai Orangtua dari keluarga dengan 2 atau 3 anak untuk melihat pemilih anak di dalam aplikasi.</p>
+    </div>
+
+    <div class="card">
+      <h3>📋 Data contoh di demo ini</h3>
+      <p style="margin:4px 0"><b>8 mentor</b> — masing-masing 1 orang untuk Matematika, IPA, IPS, IPAS, Bahasa Inggris, Fisika, Kimia, dan Biologi.</p>
+      <p style="margin:4px 0"><b>10 siswa</b> — 5 siswa masing-masing beda orangtua, 2 siswa satu orangtua (Ibu Ratna Dewi), dan 3 siswa satu orangtua (Bapak Wijaya Kusuma).</p>
+      <p style="margin:4px 0">Sudah termasuk contoh kelas, jadwal, pertemuan yang terlaksana beserta absensi &amp; laporannya, dan tagihan bulan November 2026 dengan status Lunas, Sebagian, dan Belum Bayar.</p>
+    </div>
+
+    <div class="order">
+      <h2 style="margin:0 0 6px">Aplikasi Bimbel Siap Dipesan</h2>
+      <p style="margin:0;opacity:.93">Demo ini adalah salinan contoh. Aplikasi sebenarnya dibuat sebagai salinan terpisah — mulai kosong, diisi data asli bimbel Anda.</p>
+      <a class="btnlink" href="https://rasa.web.id" target="_blank" rel="noopener">Kunjungi rasa.web.id</a>
+    </div>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <section id="appView" class="hidden">
+    <div class="topbar">
+      <div class="who"><div class="avatar" id="avatarEl">A</div><div><strong id="whoName">—</strong><br><span class="hint" id="whoRole">—</span></div></div>
+      <button class="btn secondary" onclick="logout()">⇄ Ganti Peran</button>
+    </div>
+    <p class="credit-line">Design by <a href="https://rasa.web.id" target="_blank" rel="noopener">rasa.web.id</a></p>
+    <div id="toast" class="toast hidden"></div>
+    <div class="tabs" id="tabsEl"></div>
+    <div id="tabContent"></div>
+  </section>
+
+</main>
+<footer>Design by <a href="https://rasa.web.id" target="_blank" rel="noopener">rasa.web.id</a> · Aplikasi Bimbel — Versi Demo (data contoh, tersimpan hanya selama halaman dibuka)</footer>
+
+<script>
+try{document.getElementById("todayDate").textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});}catch(e){}
+/* ================= DATA CONTOH ================= */
+var mentors=[
+ {id:'M1',name:'Andi Prasetyo, S.Pd.',mapel:'Matematika',dob:'12 Mei 1990',wa:'0812-3456-7801'},
+ {id:'M2',name:'Sari Wulandari, S.Pd.',mapel:'IPA',dob:'3 Agustus 1992',wa:'0812-3456-7802'},
+ {id:'M3',name:'Joko Susilo, S.Pd.',mapel:'IPS',dob:'25 Januari 1988',wa:'0812-3456-7803'},
+ {id:'M4',name:'Dewi Lestari, S.Pd.',mapel:'IPAS',dob:'17 September 1993',wa:'0812-3456-7804'},
+ {id:'M5',name:'Rina Anggraini, S.Pd.',mapel:'Bahasa Inggris',dob:'8 November 1991',wa:'0812-3456-7805'},
+ {id:'M6',name:'Bambang Hartono, M.Pd.',mapel:'Fisika',dob:'30 Juni 1987',wa:'0812-3456-7806'},
+ {id:'M7',name:'Fitri Rahmawati, S.Si.',mapel:'Kimia',dob:'14 Februari 1994',wa:'0812-3456-7807'},
+ {id:'M8',name:'Agus Setiawan, S.Pd.',mapel:'Biologi',dob:'21 April 1989',wa:'0812-3456-7808'}
+];
+var parents=[
+ {id:'P1',name:'Bapak Hartono',wa:'081234567001'},
+ {id:'P2',name:'Ibu Maryam Sari',wa:'081234567002'},
+ {id:'P3',name:'Bapak Slamet Riyadi',wa:'081234567003'},
+ {id:'P4',name:'Ibu Endang Lestari',wa:'081234567004'},
+ {id:'P5',name:'Bapak Ahmad Fauzi',wa:'081234567005'},
+ {id:'P6',name:'Ibu Ratna Dewi',wa:'081234567006'},
+ {id:'P7',name:'Bapak Wijaya Kusuma',wa:'081234567007'}
+];
+var students=[
+ {id:'S1',name:'Rizky Pratama',kelas:'9 SMP',parent:'P1'},
+ {id:'S2',name:'Aisyah Putri',kelas:'8 SMP',parent:'P2'},
+ {id:'S3',name:'Dimas Aditya',kelas:'7 SMP',parent:'P3'},
+ {id:'S4',name:'Nadia Safitri',kelas:'6 SD',parent:'P4'},
+ {id:'S5',name:'Fajar Ramadhan',kelas:'12 SMA',parent:'P5'},
+ {id:'S6',name:'Sabrina Zahra',kelas:'9 SMP',parent:'P6'},
+ {id:'S7',name:'Zamir Akbar',kelas:'4 SD',parent:'P6'},
+ {id:'S8',name:'Kirana Dewi',kelas:'11 SMA',parent:'P7'},
+ {id:'S9',name:'Bima Arya',kelas:'8 SMP',parent:'P7'},
+ {id:'S10',name:'Luna Cantika',kelas:'5 SD',parent:'P7'}
+];
+var classes=[
+ {id:'K1',name:'Matematika — 9 SMP',mentor:'M1',jadwal:'Senin & Rabu · 15.30–17.00',members:['S1','S6','S9']},
+ {id:'K2',name:'IPA — 8 SMP',mentor:'M2',jadwal:'Selasa & Kamis · 15.30–17.00',members:['S2','S9']},
+ {id:'K3',name:'IPS — 8 SMP',mentor:'M3',jadwal:'Rabu · 16.00–17.30',members:['S9','S2']},
+ {id:'K4',name:'IPAS — SD',mentor:'M4',jadwal:'Senin & Kamis · 15.00–16.30',members:['S4','S10','S7']},
+ {id:'K5',name:'Bahasa Inggris — 7–9 SMP',mentor:'M5',jadwal:'Selasa & Jumat · 15.30–17.00',members:['S3','S6']},
+ {id:'K6',name:'Fisika — 12 SMA',mentor:'M6',jadwal:'Rabu & Sabtu · 15.30–17.00',members:['S5','S8']},
+ {id:'K7',name:'Kimia — 11 SMA',mentor:'M7',jadwal:'Kamis & Sabtu · 15.30–17.00',members:['S8','S5']},
+ {id:'K8',name:'Biologi — 11 SMA',mentor:'M8',jadwal:'Jumat · 15.30–17.00',members:['S8','S2']}
+];
+var meetings=[
+ {id:'T1',kelas:'K1',tanggal:'Senin, 17 November 2026',mentorHadir:true,materi:'Persamaan linear dua variabel — metode eliminasi',capaian:'Siswa dapat menyelesaikan SPLDV dengan metode eliminasi secara mandiri.',pr:'Latihan soal halaman 42 nomor 1–10',kendala:'Satu siswa masih lambat pada operasi bilangan negatif.',catatan:'Pertemuan berikutnya: metode substitusi dan soal cerita.',att:{S1:'Hadir',S6:'Hadir',S9:'Izin'},locked:true},
+ {id:'T2',kelas:'K4',tanggal:'Senin, 17 November 2026',mentorHadir:true,materi:'Bagian-bagian tumbuhan dan fungsinya',capaian:'Siswa dapat menyebutkan fungsi akar, batang, daun, dan bunga dengan contoh.',pr:'Menggambar satu tumbuhan dan memberi label bagiannya',kendala:'—',catatan:'Anak-anak antusias saat praktik mengamati tanaman di halaman.',att:{S4:'Hadir',S10:'Hadir',S7:'Hadir'},locked:true},
+ {id:'T3',kelas:'K2',tanggal:'Selasa, 18 November 2026',mentorHadir:true,materi:'Sistem pencernaan manusia',capaian:'Siswa dapat mengurutkan organ pencernaan dan menjelaskan fungsi enzim.',pr:'Ringkasan satu halaman tentang perjalanan makanan',kendala:'—',catatan:'Kuis singkat 5 soal: rata-rata nilai 84.',att:{S2:'Hadir',S9:'Hadir'},locked:true},
+ {id:'T4',kelas:'K5',tanggal:'Selasa, 18 November 2026',mentorHadir:true,materi:'Simple present tense — kalimat positif dan negatif',capaian:'Siswa dapat membuat 5 kalimat kegiatan sehari-hari dengan benar.',pr:'Menulis 10 kalimat tentang kegiatan harian',kendala:'Masih sering tertukar penggunaan -s/-es pada subjek orang ketiga.',catatan:'Akan diulang singkat di awal pertemuan Jumat.',att:{S3:'Hadir',S6:'Sakit'},locked:true},
+ {id:'T5',kelas:'K6',tanggal:'Rabu, 19 November 2026',mentorHadir:true,materi:'Gerak parabola — komponen kecepatan',capaian:'Siswa dapat menguraikan kecepatan awal menjadi komponen x dan y.',pr:'Soal latihan gerak parabola nomor 1–6',kendala:'Perlu penguatan trigonometri dasar.',catatan:'Disediakan rangkuman rumus di grup kelas.',att:{S5:'Hadir',S8:'Hadir'},locked:true},
+ {id:'T6',kelas:'K1',tanggal:'Rabu, 19 November 2026',mentorHadir:true,materi:'SPLDV — metode substitusi dan soal cerita',capaian:'Siswa dapat memodelkan soal cerita menjadi SPLDV.',pr:'Paket soal cerita SPLDV (5 soal)',kendala:'—',catatan:'Persiapan kuis SPLDV hari Senin depan.',att:{S1:'Hadir',S6:'Hadir',S9:'Hadir'},locked:true}
+];
+var invoices=[
+ {id:'INV1',student:'S1',periode:'November 2026',jumlah:350000,terbayar:350000},
+ {id:'INV2',student:'S2',periode:'November 2026',jumlah:300000,terbayar:150000},
+ {id:'INV3',student:'S3',periode:'November 2026',jumlah:300000,terbayar:0},
+ {id:'INV4',student:'S4',periode:'November 2026',jumlah:250000,terbayar:250000},
+ {id:'INV5',student:'S5',periode:'November 2026',jumlah:400000,terbayar:400000},
+ {id:'INV6',student:'S6',periode:'November 2026',jumlah:350000,terbayar:175000},
+ {id:'INV7',student:'S7',periode:'November 2026',jumlah:250000,terbayar:175000},
+ {id:'INV8',student:'S8',periode:'November 2026',jumlah:400000,terbayar:0},
+ {id:'INV9',student:'S9',periode:'November 2026',jumlah:300000,terbayar:300000},
+ {id:'INV10',student:'S10',periode:'November 2026',jumlah:250000,terbayar:250000}
+];
+
+/* ================= HELPERS ================= */
+function $(id){return document.getElementById(id)}
+function mentorById(id){return mentors.filter(function(m){return m.id===id})[0]}
+function studentById(id){return students.filter(function(s){return s.id===id})[0]}
+function parentById(id){return parents.filter(function(p){return p.id===id})[0]}
+function classById(id){return classes.filter(function(c){return c.id===id})[0]}
+function rp(n){return 'Rp'+n.toLocaleString('id-ID')}
+function invStatus(inv){ if(inv.terbayar>=inv.jumlah) return ['Lunas','lunas']; if(inv.terbayar>0) return ['Sebagian','sebagian']; return ['Belum Bayar','belum']; }
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); setTimeout(function(){t.classList.add('hidden')},3500); }
+
+/* ================= LOGIN ================= */
+var curRole='admin', ortuPickId=null, session=null, curTab='', curChild=null;
+
+function pickRole(r){
+  curRole=r;
+  var btns=document.querySelectorAll('.role-btn');
+  for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('active', btns[i].getAttribute('data-role')===r); }
+  $('form-admin').classList.toggle('hidden', r!=='admin');
+  $('form-mentor').classList.toggle('hidden', r!=='mentor');
+  $('form-ortu').classList.toggle('hidden', r!=='ortu');
+}
+function renderOrtuPick(){
+  var q=($('ortuSearch').value||'').trim().toLowerCase();
+  var list=students.filter(function(s){ return q==='' || s.name.toLowerCase().indexOf(q)>-1; });
+  var html='';
+  list.forEach(function(s){
+    var p=parentById(s.parent);
+    var sib=students.filter(function(x){return x.parent===s.parent}).length;
+    html+='<button class="pick-item'+(ortuPickId===s.id?' sel':'')+'" onclick="pickOrtuStudent(\''+s.id+'\')"><span><b>'+esc(s.name)+'</b> — '+esc(s.kelas)+'<br><span class="hint">Orangtua: '+esc(p.name)+(sib>1?' · '+sib+' anak di Bimbel':'')+'</span></span><span>'+(ortuPickId===s.id?'✔ Terpilih':'Ketuk ›')+'</span></button>';
+  });
+  if(!list.length) html='<div style="padding:12px" class="hint">Tidak ada nama yang cocok. Coba huruf lain.</div>';
+  $('ortuPick').innerHTML=html;
+}
+function pickOrtuStudent(id){
+  ortuPickId=id; renderOrtuPick();
+  var s=studentById(id);
+  $('ortuSelInfo').innerHTML='Terpilih: <b>'+esc(s.name)+'</b> ('+esc(s.kelas)+') — Orangtua: '+esc(parentById(s.parent).name)+'. <a href="#" onclick="clearOrtuPick(event)">Hapus pilihan</a>';
+}
+function clearOrtuPick(e){ e.preventDefault(); ortuPickId=null; $('ortuSearch').value=''; renderOrtuPick(); $('ortuSelInfo').textContent='Belum ada nama terpilih.'; }
+
+function doLogin(){
+  // DEMO: PIN apa pun diterima — tidak ada pemeriksaan PIN.
+  if(curRole==='admin'){
+    session={role:'admin',name:'Admin Demo',label:'Pengelola / Admin'};
+  } else if(curRole==='mentor'){
+    var m=mentorById($('mentorSel').value);
+    session={role:'mentor',name:m.name,label:'Mentor '+m.mapel,mentorId:m.id};
+  } else {
+    if(!ortuPickId){ var e=$('loginError'); e.textContent='Pilih dulu nama anak Anda dari daftar yang muncul.'; e.classList.remove('hidden'); return; }
+    var s=studentById(ortuPickId);
+    session={role:'ortu',name:parentById(s.parent).name,label:'Orangtua — '+s.name,parentId:s.parent};
+    curChild=s.id;
+  }
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  $('whoName').textContent=session.name;
+  $('whoRole').textContent=session.label;
+  $('avatarEl').textContent=session.name.charAt(0);
+  var tabs = session.role==='admin' ? [['ringkasan','Ringkasan'],['data','Data Induk'],['pertemuan','Pertemuan & Absensi'],['tagihan','Tagihan'],['pin','PIN']]
+    : session.role==='mentor' ? [['pertemuan','Pertemuan Saya']]
+    : [['anak','Anak Saya'],['kehadiran','Kehadiran'],['laporan','Laporan Belajar'],['tagihan','Tagihan']];
+  var th=''; tabs.forEach(function(t){ th+='<button class="tab" data-tab="'+t[0]+'" onclick="showTab(\''+t[0]+'\')">'+t[1]+'</button>'; });
+  $('tabsEl').innerHTML=th;
+  showTab(tabs[0][0]);
+  window.scrollTo(0,0);
+}
+function logout(){ session=null; curChild=null; $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); window.scrollTo(0,0); }
+
+function showTab(t){
+  curTab=t;
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===t); }
+  if(session.role==='admin'){
+    if(t==='ringkasan') renderAdminHome();
+    else if(t==='data') renderAdminData();
+    else if(t==='pertemuan') renderMeetings(true);
+    else if(t==='tagihan') renderAdminInvoices();
+    else if(t==='pin') renderPinInfo();
+  } else if(session.role==='mentor'){
+    renderMeetings(false);
+  } else {
+    if(t==='anak') renderOrtuHome();
+    else if(t==='kehadiran') renderOrtuAttendance();
+    else if(t==='laporan') renderOrtuReports();
+    else if(t==='tagihan') renderOrtuInvoices();
+  }
+}
+
+/* ================= ADMIN ================= */
+function renderAdminHome(){
+  var totalTagihan=0,totalBayar=0;
+  invoices.forEach(function(i){ totalTagihan+=i.jumlah; totalBayar+=i.terbayar; });
+  var hadir=0,totalAtt=0;
+  meetings.forEach(function(m){ for(var k in m.att){ totalAtt++; if(m.att[k]==='Hadir') hadir++; } });
+  $('tabContent').innerHTML=
+   '<div class="stats"><div class="stat"><b>'+mentors.length+'</b><span>Mentor</span></div><div class="stat"><b>'+students.length+'</b><span>Siswa</span></div><div class="stat"><b>'+classes.length+'</b><span>Kelas</span></div><div class="stat"><b>'+meetings.length+'</b><span>Pertemuan terlaksana</span></div></div>'
+  +'<div class="grid2"><div class="card"><h3>💰 Tagihan November 2026</h3><p>Total tagihan: <b>'+rp(totalTagihan)+'</b><br>Terbayar: <b>'+rp(totalBayar)+'</b><br>Sisa: <b>'+rp(totalTagihan-totalBayar)+'</b></p><button class="btn small" onclick="showTab(\'tagihan\')">Lihat Tagihan</button></div>'
+  +'<div class="card"><h3>✅ Kehadiran Siswa</h3><p>Dari '+totalAtt+' catatan absensi pada '+meetings.length+' pertemuan contoh: <b>'+hadir+' hadir</b> ('+Math.round(hadir/totalAtt*100)+'%).</p><button class="btn small" onclick="showTab(\'pertemuan\')">Lihat Pertemuan</button></div></div>'
+  +'<div class="card"><h3>Pertemuan Terakhir</h3>'+meetings.slice(-3).reverse().map(meetingCard).join('')+'</div>';
+}
+function meetingCard(m){
+  var c=classById(m.kelas), mt=mentorById(c.mentor);
+  var nH=0,n=0; for(var k in m.att){ n++; if(m.att[k]==='Hadir') nH++; }
+  return '<div class="item"><h4>'+esc(c.name)+'</h4><p>📅 '+esc(m.tanggal)+' · Mentor: '+esc(mt.name)+' — <b>'+(m.mentorHadir?'Hadir':'Tidak hadir')+'</b></p><p>📚 '+esc(m.materi)+'</p><p>Kehadiran siswa: '+nH+' dari '+n+' hadir</p></div>';
+}
+function renderAdminData(){
+  var mh=mentors.map(function(m){ return '<tr><td><b>'+esc(m.name)+'</b></td><td>'+esc(m.mapel)+'</td><td>'+esc(m.dob)+'</td><td>'+esc(m.wa)+'</td></tr>'; }).join('');
+  var sh=students.map(function(s){ var p=parentById(s.parent); return '<tr><td><b>'+esc(s.name)+'</b></td><td>'+esc(s.kelas)+'</td><td>'+esc(p.name)+'</td><td>'+esc(p.wa)+'</td></tr>'; }).join('');
+  var ch=classes.map(function(c){ return '<div class="item"><h4>'+esc(c.name)+'</h4><p>Mentor: '+esc(mentorById(c.mentor).name)+' · 🕒 '+esc(c.jadwal)+'</p><p>Anggota: '+c.members.map(function(id){return esc(studentById(id).name)}).join(', ')+'</p></div>'; }).join('');
+  $('tabContent').innerHTML='<div class="card"><h3>👩‍🏫 Mentor (8 — satu per mapel)</h3><table><thead><tr><th>Nama</th><th>Mapel</th><th>Tanggal Lahir</th><th>WA</th></tr></thead><tbody>'+mh+'</tbody></table></div>'
+  +'<div class="card"><h3>🧒 Siswa &amp; Orangtua (10 siswa · 7 orangtua)</h3><table><thead><tr><th>Siswa</th><th>Kelas</th><th>Orangtua</th><th>WA Orangtua</th></tr></thead><tbody>'+sh+'</tbody></table><p class="hint">Ibu Ratna Dewi memiliki 2 anak (Sabrina Zahra &amp; Zamir Akbar) dan Bapak Wijaya Kusuma memiliki 3 anak (Kirana Dewi, Bima Arya &amp; Luna Cantika) — nomor WA yang sama mengelompokkan mereka sebagai satu keluarga.</p></div>'
+  +'<div class="card"><h3>🏫 Kelas</h3>'+ch+'</div>';
+}
+function renderPinInfo(){
+  $('tabContent').innerHTML='<div class="notice"><strong>Mode demo:</strong> PIN apa pun diterima untuk semua peran, supaya demo mudah dicoba.</div><div class="card"><h3>🔐 Aturan PIN pada aplikasi sebenarnya</h3><p>• <b>Admin:</b> tiap admin punya nama &amp; PIN sendiri (bisa lebih dari satu admin).<br>• <b>Mentor:</b> PIN = tanggal lahir format DDMMYY — karena itu data mentor wajib ada tanggal lahir.<br>• <b>Orangtua:</b> PIN = 4 digit terakhir nomor HP/WA orangtua yang terdaftar — karena itu data orangtua wajib ada nomor HP/WA. Nomornya tidak diketik saat masuk; orangtua cukup memilih nama anak lalu memasukkan PIN-nya.</p></div>';
+}
+
+/* ================= PERTEMUAN (Admin & Mentor) ================= */
+function renderMeetings(isAdmin){
+  var list = isAdmin ? meetings : meetings.filter(function(m){ return classById(m.kelas).mentor===session.mentorId; });
+  var myClasses = isAdmin ? classes : classes.filter(function(c){ return c.mentor===session.mentorId; });
+  var html='<div class="card"><h3>➕ Buat Pertemuan Baru</h3>'
+    +'<label>Kelas</label><select id="newKelas">'+myClasses.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select>'
+    +'<label>Tanggal (tulis, contoh: Jumat, 21 November 2026)</label><input type="text" id="newTgl" placeholder="Jumat, 21 November 2026">'
+    +'<div style="height:12px"></div><button class="btn" onclick="addMeeting()">Buat Pertemuan</button>'
+    +'<p class="hint">Pertemuan baru mulai kosong — mentor mengisi absensi &amp; laporan, lalu menyimpannya.</p></div>';
+  if(session.role==='mentor'){ var me=mentorById(session.mentorId); html='<div class="card"><h3>'+esc(me.name)+'</h3><p>Mapel: <b>'+esc(me.mapel)+'</b> · Tanggal lahir: '+esc(me.dob)+' · WA: '+esc(me.wa)+'</p><p class="hint">Menu Mentor hanya “Pertemuan Saya” — mentor tidak memiliki menu Tagihan.</p></div>'+html; }
+  html+='<div class="card"><h3>📅 Daftar Pertemuan</h3>'+(list.length? list.slice().reverse().map(function(m){return meetingDetail(m)}).join('') : '<p class="hint">Belum ada pertemuan.</p>')+'</div>';
+  $('tabContent').innerHTML=html;
+}
+function meetingDetail(m){
+  var c=classById(m.kelas), mt=mentorById(c.mentor);
+  var attHtml=c.members.map(function(sid){
+    var s=studentById(sid), cur=m.att[sid]||'';
+    if(m.locked){ return '<div class="att-row"><span><b>'+esc(s.name)+'</b> <span class="hint">('+esc(s.kelas)+')</span></span><span class="pill '+cur.toLowerCase()+'">'+(cur||'—')+'</span></div>'; }
+    var opts=['Hadir','Izin','Sakit','Alpa'].map(function(o){ return '<label><input type="radio" name="att-'+m.id+'-'+sid+'" value="'+o+'"'+(cur===o?' checked':'')+'> '+o+'</label>'; }).join('');
+    return '<div class="att-row"><span><b>'+esc(s.name)+'</b></span><span class="att-opts">'+opts+'</span></div>';
+  }).join('');
+  var reportHtml = m.locked
+    ? '<p>🎯 <b>Capaian:</b> '+esc(m.capaian||'—')+'</p><p>📝 <b>PR / Tugas:</b> '+esc(m.pr||'—')+'</p><p>⚠️ <b>Kendala:</b> '+esc(m.kendala||'—')+'</p><p>💬 <b>Catatan mentor:</b> '+esc(m.catatan||'—')+'</p>'
+    : '<label>Materi yang dibahas</label><input type="text" id="mat-'+m.id+'" value="'+esc(m.materi||'')+'">'
+      +'<label>Capaian pembelajaran</label><textarea id="cap-'+m.id+'">'+esc(m.capaian||'')+'</textarea>'
+      +'<label>PR / Tugas</label><input type="text" id="pr-'+m.id+'" value="'+esc(m.pr||'')+'">'
+      +'<label>Kendala</label><input type="text" id="ken-'+m.id+'" value="'+esc(m.kendala||'')+'">'
+      +'<label>Catatan untuk orangtua</label><textarea id="cat-'+m.id+'">'+esc(m.catatan||'')+'</textarea>'
+      +'<div style="height:12px"></div><button class="btn" onclick="saveMeeting(\''+m.id+'\')">💾 Simpan Absensi &amp; Laporan (terkunci setelah disimpan)</button>';
+  return '<div class="item"><h4>'+esc(c.name)+' — '+esc(m.tanggal)+'</h4>'
+    +'<p>Mentor: '+esc(mt.name)+' — <b>'+(m.mentorHadir?'Hadir':'Belum absen')+'</b>'+(m.locked?' · <span class="pill lunas">Tersimpan &amp; Terkunci</span>':' · <span class="pill sebagian">Belum disimpan</span>')+'</p>'
+    +'<p>📚 <b>Materi:</b> '+esc(m.materi||'(belum diisi)')+'</p>'
+    +'<h4 style="margin-top:12px">Absensi Siswa</h4>'+attHtml
+    +'<h4 style="margin-top:12px">Laporan Pertemuan</h4>'+reportHtml+'</div>';
+}
+function addMeeting(){
+  var kid=$('newKelas').value, tgl=($('newTgl').value||'').trim();
+  if(!tgl){ toast('Isi tanggal pertemuan dulu.'); return; }
+  meetings.push({id:'T'+Date.now(),kelas:kid,tanggal:tgl,mentorHadir:true,materi:'',capaian:'',pr:'',kendala:'',catatan:'',att:{},locked:false});
+  toast('Pertemuan baru dibuat. Silakan isi absensi & laporan di daftar pertemuan.');
+  renderMeetings(session.role==='admin');
+}
+function saveMeeting(id){
+  var m=meetings.filter(function(x){return x.id===id})[0]; var c=classById(m.kelas);
+  c.members.forEach(function(sid){
+    var els=document.getElementsByName('att-'+id+'-'+sid);
+    for(var i=0;i<els.length;i++){ if(els[i].checked) m.att[sid]=els[i].value; }
+    if(!m.att[sid]) m.att[sid]='Hadir';
+  });
+  m.materi=$('mat-'+id).value; m.capaian=$('cap-'+id).value; m.pr=$('pr-'+id).value; m.kendala=$('ken-'+id).value; m.catatan=$('cat-'+id).value;
+  m.locked=true;
+  toast('Absensi & laporan tersimpan dan terkunci.');
+  renderMeetings(session.role==='admin');
+}
+
+/* ================= TAGIHAN ADMIN ================= */
+var invFilterQ='', invFilterStatus='';
+function renderAdminInvoices(){
+  var rows=invoices.filter(function(inv){
+    var s=studentById(inv.student); var st=invStatus(inv)[0];
+    return (invFilterQ===''||s.name.toLowerCase().indexOf(invFilterQ)>-1) && (invFilterStatus===''||st===invFilterStatus);
+  }).map(function(inv){
+    var s=studentById(inv.student), st=invStatus(inv);
+    var sisa=inv.jumlah-inv.terbayar;
+    return '<div class="item"><h4>'+esc(s.name)+' <span class="hint">('+esc(s.kelas)+' · '+esc(parentById(s.parent).name)+')</span> <span class="pill '+st[1]+'">'+st[0]+'</span></h4>'
+      +'<p>Periode '+esc(inv.periode)+' · Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b>'+(sisa>0?' · Sisa <b>'+rp(sisa)+'</b>':'')+'</p>'
+      +(sisa>0?'<button class="btn small" onclick="payInvoice(\''+inv.id+'\')">💵 Catat Lunas (demo)</button>':'<p>✅ Lunas</p>')+'</div>';
+  }).join('');
+  $('tabContent').innerHTML='<div class="card"><h3>🧾 Tagihan Siswa — November 2026</h3>'
+   +'<label>Cari nama siswa</label><input type="text" placeholder="Ketik 1–3 huruf nama siswa…" value="'+esc(invFilterQ)+'" oninput="invFilterQ=this.value.toLowerCase();renderAdminInvoicesKeep(this)">'
+   +'<label>Saring status</label><select onchange="invFilterStatus=this.value;renderAdminInvoices()"><option value="">Semua status</option><option'+(invFilterStatus==='Lunas'?' selected':'')+'>Lunas</option><option'+(invFilterStatus==='Sebagian'?' selected':'')+'>Sebagian</option><option'+(invFilterStatus==='Belum Bayar'?' selected':'')+'>Belum Bayar</option></select>'
+   +'<div style="height:12px"></div>'+(rows||'<p class="hint">Belum ada tagihan pada saringan ini.</p>')+'</div>'
+   +'<div class="card"><h3>➕ Buat Tagihan Baru (demo)</h3><label>Siswa</label><select id="newInvStudent">'+students.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'}).join('')+'</select><label>Jumlah (Rp)</label><input type="number" id="newInvAmt" value="300000" min="0" step="1000"><div style="height:12px"></div><button class="btn" onclick="addInvoice()">Buat Tagihan November 2026</button></div>';
+}
+function renderAdminInvoicesKeep(input){
+  var pos=input.selectionStart; renderAdminInvoices();
+  var el=document.querySelector('#tabContent input[type="text"]'); if(el){ el.focus(); el.setSelectionRange(pos,pos); }
+}
+function payInvoice(id){ var inv=invoices.filter(function(x){return x.id===id})[0]; inv.terbayar=inv.jumlah; toast('Pembayaran dicatat — tagihan '+studentById(inv.student).name+' kini Lunas (demo, hanya selama halaman dibuka).'); renderAdminInvoices(); }
+function addInvoice(){ var sid=$('newInvStudent').value, amt=parseInt($('newInvAmt').value||'0',10); if(!(amt>0)){ toast('Isi jumlah tagihan yang benar.'); return; } invoices.push({id:'INV'+Date.now(),student:sid,periode:'November 2026',jumlah:amt,terbayar:0}); toast('Tagihan baru dibuat untuk '+studentById(sid).name+'.'); renderAdminInvoices(); }
+
+/* ================= ORANGTUA ================= */
+function siblings(){ return students.filter(function(s){return s.parent===session.parentId}); }
+function childChips(){
+  var sib=siblings(); if(sib.length<2) return '';
+  return '<div class="card"><h3 style="margin-bottom:4px">Anak Anda — ketuk nama untuk berpindah</h3><div class="chips">'+sib.map(function(s){ return '<button class="chip'+(curChild===s.id?' active':'')+'" onclick="curChild=\''+s.id+'\';showTab(curTab)">'+esc(s.name)+' — '+esc(s.kelas)+'</button>'; }).join('')+'</div><p class="hint" style="margin:0">Semua anak dengan nomor WA orangtua yang sama muncul bersamaan — tanpa keluar dan tanpa memasukkan PIN lagi.</p></div>';
+}
+function renderOrtuHome(){
+  var p=parentById(session.parentId);
+  $('tabContent').innerHTML=childChips()+'<div class="card"><h3>'+esc(p.name)+'</h3><p>WA terdaftar: '+esc(p.wa)+' · Jumlah anak di Bimbel: <b>'+siblings().length+'</b></p>'
+  + siblings().map(function(s){
+      var invs=invoices.filter(function(i){return i.student===s.id}); var sisa=0; invs.forEach(function(i){sisa+=i.jumlah-i.terbayar});
+      return '<div class="item"><h4>'+esc(s.name)+' — '+esc(s.kelas)+'</h4><p>Kelas diikuti: '+classes.filter(function(c){return c.members.indexOf(s.id)>-1}).map(function(c){return esc(c.name)}).join(' · ')+'</p><p>Tagihan November 2026: '+(sisa>0?'sisa <b>'+rp(sisa)+'</b>':'<b>Lunas</b>')+'</p><button class="btn small" onclick="curChild=\''+s.id+'\';showTab(\'kehadiran\')">Lihat Kehadiran</button></div>';
+    }).join('')+'</div>';
+}
+function renderOrtuAttendance(){
+  var s=studentById(curChild);
+  var rows=meetings.filter(function(m){ return classById(m.kelas).members.indexOf(curChild)>-1 && m.att[curChild]; }).map(function(m){
+    var st=m.att[curChild];
+    return '<div class="att-row"><span><b>'+esc(classById(m.kelas).name)+'</b><br><span class="hint">'+esc(m.tanggal)+' · Mentor hadir: '+(m.mentorHadir?'Ya':'Tidak')+'</span></span><span class="pill '+st.toLowerCase()+'">'+st+'</span></div>';
+  }).join('');
+  $('tabContent').innerHTML=childChips()+'<div class="card"><h3>✅ Kehadiran '+esc(s.name)+'</h3>'+(rows||'<p class="hint">Belum ada catatan kehadiran.</p>')+'</div>';
+}
+function renderOrtuReports(){
+  var s=studentById(curChild);
+  var rows=meetings.filter(function(m){ return classById(m.kelas).members.indexOf(curChild)>-1 && m.locked; }).map(function(m){
+    return '<div class="item"><h4>'+esc(classById(m.kelas).name)+' — '+esc(m.tanggal)+'</h4><p>📚 <b>Materi:</b> '+esc(m.materi)+'</p><p>🎯 <b>Capaian:</b> '+esc(m.capaian)+'</p><p>📝 <b>PR:</b> '+esc(m.pr)+'</p><p>💬 <b>Catatan mentor:</b> '+esc(m.catatan)+'</p></div>';
+  }).join('');
+  $('tabContent').innerHTML=childChips()+'<div class="card"><h3>📋 Laporan Belajar '+esc(s.name)+'</h3>'+(rows||'<p class="hint">Belum ada laporan pertemuan.</p>')+'</div>';
+}
+function renderOrtuInvoices(){
+  var html=childChips();
+  siblings().forEach(function(s){
+    var rows=invoices.filter(function(i){return i.student===s.id}).map(function(inv){
+      var st=invStatus(inv); var sisa=inv.jumlah-inv.terbayar;
+      return '<div class="item"><h4>'+esc(inv.periode)+' <span class="pill '+st[1]+'">'+st[0]+'</span></h4><p>Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b>'+(sisa>0?' · Sisa <b>'+rp(sisa)+'</b>':'')+'</p><p class="hint">Pembayaran dicatat manual oleh Pengelola (transfer / tunai) — hubungi Pengelola bila sudah membayar.</p></div>';
+    }).join('');
+    html+='<div class="card"><h3>🧾 Tagihan '+esc(s.name)+'</h3>'+(rows||'<p class="hint">Belum ada tagihan.</p>')+'</div>';
+  });
+  $('tabContent').innerHTML=html;
+}
+
+/* init */
+(function(){
+  var ms=$('mentorSel');
+  ms.innerHTML=mentors.map(function(m){ return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.mapel)+'</option>'; }).join('');
+  renderOrtuPick();
+})();
+</script>
+</body>
+</html>
