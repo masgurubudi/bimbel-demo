@@ -209,7 +209,7 @@ th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertic
   </section>
 
 </main>
-<footer>Design by <a href="https://rasa.web.id" target="_blank" rel="noopener">rasa.web.id</a> · Aplikasi Bimbel — Versi Demo (data contoh, tersimpan hanya selama halaman dibuka)</footer>
+<footer>Design by <a href="https://rasa.web.id" target="_blank" rel="noopener">rasa.web.id</a> · Aplikasi Bimbel</footer>
 
 <script>
 try{document.getElementById("todayDate").textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});}catch(e){}
@@ -316,9 +316,9 @@ function doLogin(){
   $('whoName').textContent=session.name;
   $('whoRole').textContent=session.label;
   $('avatarEl').textContent=session.name.charAt(0);
-  var tabs = session.role==='admin' ? [['ringkasan','Ringkasan'],['data','Data Induk'],['pertemuan','Pertemuan & Absensi'],['tagihan','Tagihan'],['pin','PIN']]
+  var tabs = session.role==='admin' ? [['ringkasan','Beranda'],['pertemuan','Pertemuan'],['tagihan','Tagihan'],['data','Data']]
     : session.role==='mentor' ? [['pertemuan','Pertemuan Saya']]
-    : [['anak','Anak Saya'],['kehadiran','Kehadiran'],['laporan','Laporan Belajar'],['tagihan','Tagihan']];
+    : [['anak','Beranda'],['kehadiran','Kehadiran'],['laporan','Laporan'],['tagihan','Tagihan']];
   var th=''; tabs.forEach(function(t){ th+='<button class="tab" data-tab="'+t[0]+'" onclick="showTab(\''+t[0]+'\')">'+t[1]+'</button>'; });
   $('tabsEl').innerHTML=th;
   showTab(tabs[0][0]);
@@ -335,7 +335,6 @@ function showTab(t){
     else if(t==='data') renderAdminData();
     else if(t==='pertemuan') renderMeetings(true);
     else if(t==='tagihan') renderAdminInvoices();
-    else if(t==='pin') renderPinInfo();
   } else if(session.role==='mentor'){
     renderMeetings(false);
   } else {
@@ -355,7 +354,7 @@ function renderAdminHome(){
   $('tabContent').innerHTML=
    '<div class="stats"><div class="stat"><b>'+mentors.length+'</b><span>Mentor</span></div><div class="stat"><b>'+students.length+'</b><span>Siswa</span></div><div class="stat"><b>'+classes.length+'</b><span>Kelas</span></div><div class="stat"><b>'+meetings.length+'</b><span>Pertemuan terlaksana</span></div></div>'
   +'<div class="grid2"><div class="card"><h3>💰 Tagihan November 2026</h3><p>Total tagihan: <b>'+rp(totalTagihan)+'</b><br>Terbayar: <b>'+rp(totalBayar)+'</b><br>Sisa: <b>'+rp(totalTagihan-totalBayar)+'</b></p><button class="btn small" onclick="showTab(\'tagihan\')">Lihat Tagihan</button></div>'
-  +'<div class="card"><h3>✅ Kehadiran Siswa</h3><p>Dari '+totalAtt+' catatan absensi pada '+meetings.length+' pertemuan contoh: <b>'+hadir+' hadir</b> ('+Math.round(hadir/totalAtt*100)+'%).</p><button class="btn small" onclick="showTab(\'pertemuan\')">Lihat Pertemuan</button></div></div>'
+  +'<div class="card"><h3>✅ Kehadiran Siswa</h3><p>Dari '+totalAtt+' catatan absensi pada '+meetings.length+' pertemuan: <b>'+hadir+' hadir</b> ('+Math.round(hadir/totalAtt*100)+'%).</p><button class="btn small" onclick="showTab(\'pertemuan\')">Lihat Pertemuan</button></div></div>'
   +'<div class="card"><h3>Pertemuan Terakhir</h3>'+meetings.slice(-3).reverse().map(meetingCard).join('')+'</div>';
 }
 function meetingCard(m){
@@ -373,18 +372,27 @@ function renderAdminData(){
   +'<div><label for="nmMapel">Mata Pelajaran</label><input type="text" id="nmMapel" placeholder="Contoh: Matematika"></div>'
   +'<div><label for="nmDob">Tanggal Lahir (wajib)</label><input type="date" id="nmDob"></div>'
   +'<div><label for="nmWa">Nomor HP/WA</label><input type="text" id="nmWa" inputmode="tel" placeholder="Contoh: 0812-3456-7890"></div></div>'
-  +'<p class="hint">Tanggal lahir wajib diisi — pada aplikasi sebenarnya, PIN mentor adalah tanggal lahirnya dalam format DDMMYY.</p>'
+  +'<p class="hint">PIN mentor adalah tanggal lahirnya dalam format DDMMYY.</p>'
   +'<button class="btn" onclick="addMentor()">Tambah Mentor</button></div>'
-  +'<div class="card"><h3>🧒 Siswa &amp; Orangtua ('+students.length+' siswa · '+parents.length+' orangtua)</h3><table><thead><tr><th>Siswa</th><th>Kelas</th><th>Orangtua</th><th>WA Orangtua</th><th>Hubungan</th></tr></thead><tbody>'+sh+'</tbody></table><p class="hint">Ibu Ratna Dewi memiliki 2 anak (Sabrina Zahra &amp; Zamir Akbar) dan Bapak Wijaya Kusuma memiliki 3 anak (Kirana Dewi, Bima Arya &amp; Luna Cantika) — nomor WA yang sama mengelompokkan mereka sebagai satu keluarga.</p>'
+  +'<div class="card"><h3>🧒 Siswa &amp; Orangtua ('+students.length+' siswa · '+parents.length+' orangtua)</h3><table><thead><tr><th>Siswa</th><th>Kelas</th><th>Orangtua</th><th>WA Orangtua</th><th>Hubungan</th></tr></thead><tbody>'+sh+'</tbody></table>'
   +'<h3 style="margin:22px 0 0">➕ Tambah Siswa</h3>'
   +'<div class="grid2"><div><label for="nsName">Nama siswa</label><input type="text" id="nsName" placeholder="Contoh: Rizky Pratama"></div>'
   +'<div><label for="nsKelas">Kelas</label><input type="text" id="nsKelas" placeholder="Contoh: 9 SMP"></div>'
   +'<div><label for="nsParent">Nama orangtua</label><input type="text" id="nsParent" placeholder="Contoh: Ibu Sari Wulandari"></div>'
   +'<div><label for="nsWa">Nomor HP/WA orangtua (wajib)</label><input type="text" id="nsWa" inputmode="tel" placeholder="Contoh: 081234567890"></div>'
   +'<div><label for="nsRel">Hubungan dengan siswa</label><select id="nsRel"><option value="Ayah">Ayah</option><option value="Ibu">Ibu</option><option value="Kakak">Kakak</option><option value="Wali">Wali</option><option value="Lainnya">Lainnya</option></select></div></div>'
-  +'<p class="hint">Nomor HP/WA orangtua wajib diisi — pada aplikasi sebenarnya, PIN orangtua adalah 4 digit terakhir nomor ini. Bila nomor WA sama dengan orangtua yang sudah terdaftar, siswa baru otomatis tergabung dalam keluarga yang sama.</p>'
+  +'<p class="hint">PIN orangtua adalah 4 digit terakhir nomor HP/WA orangtua yang terdaftar.</p>'
   +'<button class="btn" onclick="addStudent()">Tambah Siswa</button></div>'
-  +'<div class="card"><h3>🏫 Kelas</h3>'+ch+'</div>';
+  +'<div class="card"><h3>🏫 Kelas</h3>'+ch+'</div>'
+  + pinSection();
+}
+function pinSection(){
+  var mh=mentors.map(function(m){ return '<div class="att-row"><span><b>'+esc(m.name)+'</b> <span class="hint">('+esc(m.mapel)+')</span></span><span class="hint">PIN aktif · lahir '+esc(m.dob)+'</span></div>'; }).join('');
+  var ph=parents.map(function(p){ var kids=students.filter(function(s){return s.parent===p.id}).map(function(s){return esc(s.name)}).join(', '); return '<div class="att-row"><span><b>'+esc(p.name)+'</b><br><span class="hint">'+kids+'</span></span><span class="hint">PIN aktif · WA '+esc(p.wa)+'</span></div>'; }).join('');
+  return '<div class="card"><h3>🔐 PIN</h3>'
+  +'<p style="margin:4px 0"><b>Admin Demo</b> — Pengelola / Admin · <span class="hint">PIN aktif</span></p>'
+  +'<h4 style="margin:18px 0 4px">PIN Mentor</h4>'+mh
+  +'<h4 style="margin:18px 0 4px">PIN Orangtua</h4>'+ph+'</div>';
 }
 function fmtDob(v){
   var p=v.split('-'); if(p.length!==3) return v;
@@ -425,9 +433,7 @@ function addStudent(){
   toast('Siswa '+name+' ditambahkan — langsung tampil di tabel Data Induk dan di pilihan masuk Orangtua.');
   renderAdminData();
 }
-function renderPinInfo(){
-  $('tabContent').innerHTML='<div class="notice"><strong>Mode demo:</strong> PIN apa pun diterima untuk semua peran, supaya demo mudah dicoba.</div><div class="card"><h3>🔐 Aturan PIN pada aplikasi sebenarnya</h3><p>• <b>Admin:</b> tiap admin punya nama &amp; PIN sendiri (bisa lebih dari satu admin).<br>• <b>Mentor:</b> PIN = tanggal lahir format DDMMYY — karena itu data mentor wajib ada tanggal lahir.<br>• <b>Orangtua:</b> PIN = 4 digit terakhir nomor HP/WA orangtua yang terdaftar — karena itu data orangtua wajib ada nomor HP/WA. Nomornya tidak diketik saat masuk; orangtua cukup memilih nama anak lalu memasukkan PIN-nya.</p></div>';
-}
+
 
 /* ================= PERTEMUAN (Admin & Mentor) ================= */
 function renderMeetings(isAdmin){
@@ -436,9 +442,7 @@ function renderMeetings(isAdmin){
   var html='<div class="card"><h3>➕ Buat Pertemuan Baru</h3>'
     +'<label>Kelas</label><select id="newKelas">'+myClasses.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select>'
     +'<label>Tanggal (tulis, contoh: Jumat, 21 November 2026)</label><input type="text" id="newTgl" placeholder="Jumat, 21 November 2026">'
-    +'<div style="height:12px"></div><button class="btn" onclick="addMeeting()">Buat Pertemuan</button>'
-    +'<p class="hint">Pertemuan baru mulai kosong — mentor mengisi absensi &amp; laporan, lalu menyimpannya.</p></div>';
-  if(session.role==='mentor'){ var me=mentorById(session.mentorId); html='<div class="card"><h3>'+esc(me.name)+'</h3><p>Mapel: <b>'+esc(me.mapel)+'</b> · Tanggal lahir: '+esc(me.dob)+' · WA: '+esc(me.wa)+'</p><p class="hint">Menu Mentor hanya “Pertemuan Saya” — mentor tidak memiliki menu Tagihan.</p></div>'+html; }
+    +'<div style="height:12px"></div><button class="btn" onclick="addMeeting()">Buat Pertemuan</button></div>';
   html+='<div class="card"><h3>📅 Daftar Pertemuan</h3>'+(list.length? list.slice().reverse().map(function(m){return meetingDetail(m)}).join('') : '<p class="hint">Belum ada pertemuan.</p>')+'</div>';
   $('tabContent').innerHTML=html;
 }
@@ -495,26 +499,26 @@ function renderAdminInvoices(){
     var sisa=inv.jumlah-inv.terbayar;
     return '<div class="item"><h4>'+esc(s.name)+' <span class="hint">('+esc(s.kelas)+' · '+esc(parentById(s.parent).name)+')</span> <span class="pill '+st[1]+'">'+st[0]+'</span></h4>'
       +'<p>Periode '+esc(inv.periode)+' · Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b>'+(sisa>0?' · Sisa <b>'+rp(sisa)+'</b>':'')+'</p>'
-      +(sisa>0?'<button class="btn small" onclick="payInvoice(\''+inv.id+'\')">💵 Catat Lunas (demo)</button>':'<p>✅ Lunas</p>')+'</div>';
+      +(sisa>0?'<button class="btn small" onclick="payInvoice(\''+inv.id+'\')">💵 Catat Lunas</button>':'<p>✅ Lunas</p>')+'</div>';
   }).join('');
   $('tabContent').innerHTML='<div class="card"><h3>🧾 Tagihan Siswa — November 2026</h3>'
    +'<label>Cari nama siswa</label><input type="text" placeholder="Ketik 1–3 huruf nama siswa…" value="'+esc(invFilterQ)+'" oninput="invFilterQ=this.value.toLowerCase();renderAdminInvoicesKeep(this)">'
    +'<label>Saring status</label><select onchange="invFilterStatus=this.value;renderAdminInvoices()"><option value="">Semua status</option><option'+(invFilterStatus==='Lunas'?' selected':'')+'>Lunas</option><option'+(invFilterStatus==='Sebagian'?' selected':'')+'>Sebagian</option><option'+(invFilterStatus==='Belum Bayar'?' selected':'')+'>Belum Bayar</option></select>'
    +'<div style="height:12px"></div>'+(rows||'<p class="hint">Belum ada tagihan pada saringan ini.</p>')+'</div>'
-   +'<div class="card"><h3>➕ Buat Tagihan Baru (demo)</h3><label>Siswa</label><select id="newInvStudent">'+students.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'}).join('')+'</select><label>Jumlah (Rp)</label><input type="number" id="newInvAmt" value="300000" min="0" step="1000"><div style="height:12px"></div><button class="btn" onclick="addInvoice()">Buat Tagihan November 2026</button></div>';
+   +'<div class="card"><h3>➕ Buat Tagihan Baru</h3><label>Siswa</label><select id="newInvStudent">'+students.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'}).join('')+'</select><label>Jumlah (Rp)</label><input type="number" id="newInvAmt" value="300000" min="0" step="1000"><div style="height:12px"></div><button class="btn" onclick="addInvoice()">Buat Tagihan November 2026</button></div>';
 }
 function renderAdminInvoicesKeep(input){
   var pos=input.selectionStart; renderAdminInvoices();
   var el=document.querySelector('#tabContent input[type="text"]'); if(el){ el.focus(); el.setSelectionRange(pos,pos); }
 }
-function payInvoice(id){ var inv=invoices.filter(function(x){return x.id===id})[0]; inv.terbayar=inv.jumlah; toast('Pembayaran dicatat — tagihan '+studentById(inv.student).name+' kini Lunas (demo, hanya selama halaman dibuka).'); renderAdminInvoices(); }
+function payInvoice(id){ var inv=invoices.filter(function(x){return x.id===id})[0]; inv.terbayar=inv.jumlah; toast('Pembayaran dicatat — tagihan '+studentById(inv.student).name+' kini Lunas.'); renderAdminInvoices(); }
 function addInvoice(){ var sid=$('newInvStudent').value, amt=parseInt($('newInvAmt').value||'0',10); if(!(amt>0)){ toast('Isi jumlah tagihan yang benar.'); return; } invoices.push({id:'INV'+Date.now(),student:sid,periode:'November 2026',jumlah:amt,terbayar:0}); toast('Tagihan baru dibuat untuk '+studentById(sid).name+'.'); renderAdminInvoices(); }
 
 /* ================= ORANGTUA ================= */
 function siblings(){ return students.filter(function(s){return s.parent===session.parentId}); }
 function childChips(){
   var sib=siblings(); if(sib.length<2) return '';
-  return '<div class="card"><h3 style="margin-bottom:4px">Anak Anda — ketuk nama untuk berpindah</h3><div class="chips">'+sib.map(function(s){ return '<button class="chip'+(curChild===s.id?' active':'')+'" onclick="curChild=\''+s.id+'\';showTab(curTab)">'+esc(s.name)+' — '+esc(s.kelas)+'</button>'; }).join('')+'</div><p class="hint" style="margin:0">Semua anak dengan nomor WA orangtua yang sama muncul bersamaan — tanpa keluar dan tanpa memasukkan PIN lagi.</p></div>';
+  return '<div class="card"><h3 style="margin-bottom:4px">Anak Anda — ketuk nama untuk berpindah</h3><div class="chips">'+sib.map(function(s){ return '<button class="chip'+(curChild===s.id?' active':'')+'" onclick="curChild=\''+s.id+'\';showTab(curTab)">'+esc(s.name)+' — '+esc(s.kelas)+'</button>'; }).join('')+'</div></div>';
 }
 function renderOrtuHome(){
   var p=parentById(session.parentId);
