@@ -306,7 +306,9 @@ function pickRole(r){
 }
 function renderOrtuPick(){
   var q=($('ortuSearch').value||'').trim().toLowerCase();
-  var list=students.filter(function(s){ return q==='' || s.name.toLowerCase().indexOf(q)>-1; });
+  if(q===''){ $('ortuPick').innerHTML=''; $('ortuPick').style.display='none'; return; }
+  $('ortuPick').style.display='';
+  var list=students.filter(function(s){ return s.name.toLowerCase().indexOf(q)>-1; });
   var html='';
   list.forEach(function(s){
     var p=parentById(s.parent);
