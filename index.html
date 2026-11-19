@@ -73,10 +73,6 @@ textarea{min-height:74px;resize:vertical}
 .btn.small{width:auto;padding:8px 14px;font-size:.88rem}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .hint{color:var(--muted);font-size:.88rem}
-.pick-list{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
-.pick-item{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;background:var(--card);border:none;border-bottom:1px solid var(--line);padding:12px;cursor:pointer;color:var(--ink)}
-.pick-item:last-child{border-bottom:none}
-.pick-item.sel{background:var(--teal-soft)}
 .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
 .pill.lunas{background:var(--green-soft);color:var(--green)}
 .pill.sebagian{background:var(--amber-soft);color:var(--amber)}
@@ -175,10 +171,8 @@ th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertic
       </div>
       <!-- Ortu form -->
       <div id="form-ortu" class="hidden">
-        <label for="ortuSearch">Nama anak</label>
-        <input type="text" id="ortuSearch" placeholder="Ketik 1–3 huruf nama anak Anda…" autocomplete="off" oninput="renderOrtuPick()">
-        <div id="ortuPick" class="pick-list"></div>
-        <p class="hint" id="ortuSelInfo">Belum ada nama terpilih.</p>
+        <label for="ortuSel">Nama anak</label>
+        <select id="ortuSel"></select>
         <label for="ortuPin">PIN</label>
         <input type="password" id="ortuPin" inputmode="numeric" placeholder="Masukkan PIN apa saja — demo menerima semua PIN" autocomplete="off">
       </div>
@@ -294,7 +288,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); setTimeout(function(){t.classList.add('hidden')},3500); }
 
 /* ================= LOGIN ================= */
-var curRole='admin', ortuPickId=null, session=null, curTab='', curChild=null;
+var curRole='admin', session=null, curTab='', curChild=null;
 
 function pickRole(r){
   curRole=r;
@@ -304,26 +298,6 @@ function pickRole(r){
   $('form-mentor').classList.toggle('hidden', r!=='mentor');
   $('form-ortu').classList.toggle('hidden', r!=='ortu');
 }
-function renderOrtuPick(){
-  var q=($('ortuSearch').value||'').trim().toLowerCase();
-  if(q===''){ $('ortuPick').innerHTML=''; $('ortuPick').style.display='none'; return; }
-  $('ortuPick').style.display='';
-  var list=students.filter(function(s){ return s.name.toLowerCase().indexOf(q)>-1; });
-  var html='';
-  list.forEach(function(s){
-    var p=parentById(s.parent);
-    var sib=students.filter(function(x){return x.parent===s.parent}).length;
-    html+='<button class="pick-item'+(ortuPickId===s.id?' sel':'')+'" onclick="pickOrtuStudent(\''+s.id+'\')"><span><b>'+esc(s.name)+'</b> — '+esc(s.kelas)+'<br><span class="hint">Orangtua: '+esc(p.name)+(sib>1?' · '+sib+' anak di Bimbel':'')+'</span></span><span>'+(ortuPickId===s.id?'✔ Terpilih':'Ketuk ›')+'</span></button>';
-  });
-  if(!list.length) html='<div style="padding:12px" class="hint">Tidak ada nama yang cocok. Coba huruf lain.</div>';
-  $('ortuPick').innerHTML=html;
-}
-function pickOrtuStudent(id){
-  ortuPickId=id; renderOrtuPick();
-  var s=studentById(id);
-  $('ortuSelInfo').innerHTML='Terpilih: <b>'+esc(s.name)+'</b> ('+esc(s.kelas)+') — Orangtua: '+esc(parentById(s.parent).name)+'. <a href="#" onclick="clearOrtuPick(event)">Hapus pilihan</a>';
-}
-function clearOrtuPick(e){ e.preventDefault(); ortuPickId=null; $('ortuSearch').value=''; renderOrtuPick(); $('ortuSelInfo').textContent='Belum ada nama terpilih.'; }
 
 function doLogin(){
   // DEMO: PIN apa pun diterima — tidak ada pemeriksaan PIN.
@@ -333,8 +307,7 @@ function doLogin(){
     var m=mentorById($('mentorSel').value);
     session={role:'mentor',name:m.name,label:'Mentor '+m.mapel,mentorId:m.id};
   } else {
-    if(!ortuPickId){ var e=$('loginError'); e.textContent='Pilih dulu nama anak Anda dari daftar yang muncul.'; e.classList.remove('hidden'); return; }
-    var s=studentById(ortuPickId);
+    var s=studentById($('ortuSel').value);
     session={role:'ortu',name:parentById(s.parent).name,label:'Orangtua — '+s.name,parentId:s.parent};
     curChild=s.id;
   }
@@ -528,7 +501,8 @@ function renderOrtuInvoices(){
 (function(){
   var ms=$('mentorSel');
   ms.innerHTML=mentors.map(function(m){ return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.mapel)+'</option>'; }).join('');
-  renderOrtuPick();
+  var os=$('ortuSel');
+  os.innerHTML=students.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'; }).join('');
 })();
 </script>
 </body>
