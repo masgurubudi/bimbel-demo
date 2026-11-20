@@ -556,14 +556,30 @@ function addClass(){
 
 
 /* ================= PERTEMUAN (Admin & Mentor) ================= */
+function meetingWithin24h(m){
+  // Pertemuan yang belum disimpan selalu tampil agar bisa diisi absensi & laporannya.
+  if(!m.locked) return true;
+  var t=parseTanggalID(m.tanggal);
+  // Tanggal tidak terbaca (format bebas) — jangan sembunyikan datanya.
+  if(!t) return true;
+  // Tanggal pertemuan hanya berisi hari, tanpa jam: anggap hari pertemuan
+  // berlangsung sampai akhir hari itu, lalu cek apakah hari itu bersinggungan
+  // dengan jendela 24 jam terakhir (sekarang − 24 jam s.d. sekarang).
+  var now=Date.now();
+  var dayEnd=t+(24*60*60*1000)-1;
+  return dayEnd >= (now-24*60*60*1000) && t <= now;
+}
 function renderMeetings(isAdmin){
-  var list = isAdmin ? meetings : meetings.filter(function(m){ return classById(m.kelas).mentor===session.mentorId; });
+  var allList = isAdmin ? meetings.slice() : meetings.filter(function(m){ return classById(m.kelas).mentor===session.mentorId; });
+  var list = allList.filter(meetingWithin24h);
   var myClasses = isAdmin ? classes : classes.filter(function(c){ return c.mentor===session.mentorId; });
   var html='<div class="card"><h3>➕ Buat Pertemuan Baru</h3>'
     +'<label>Kelas</label><select id="newKelas">'+myClasses.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select>'
     +'<label>Tanggal (tulis, contoh: Jumat, 21 November 2026)</label><input type="text" id="newTgl" placeholder="Jumat, 21 November 2026">'
     +'<div style="height:12px"></div><button class="btn" onclick="addMeeting()">Buat Pertemuan</button></div>';
-  html+='<div class="card"><h3>📅 Daftar Pertemuan</h3>'+(list.length? list.slice().reverse().map(function(m){return meetingDetail(m)}).join('') : '<p class="hint">Belum ada pertemuan.</p>')+'</div>';
+  html+='<div class="card"><h3>📅 Daftar Pertemuan</h3>'
+    +'<p class="hint" style="margin-top:0">Hanya pertemuan dalam <b>24 jam terakhir</b> yang ditampilkan di sini'+(allList.length? ' — <b>'+list.length+' dari '+allList.length+' pertemuan</b>' : '')+'. Pertemuan yang lebih lama tidak ditampilkan. Pertemuan yang belum disimpan tetap ditampilkan agar bisa diisi.</p>'
+    +(list.length? list.slice().reverse().map(function(m){return meetingDetail(m)}).join('') : '<p class="hint">Tidak ada pertemuan dalam 24 jam terakhir.</p>')+'</div>';
   $('tabContent').innerHTML=html;
 }
 function meetingDetail(m){
