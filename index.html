@@ -159,7 +159,7 @@ th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertic
       <!-- Admin form -->
       <div id="form-admin">
         <label for="adminSel">Nama Admin</label>
-        <select id="adminSel"><option value="Admin Demo">Admin Demo — Pengelola Bimbel</option></select>
+        <select id="adminSel"><option value="A1">Admin Demo — Pengelola / Admin</option></select>
         <label for="adminPin">PIN</label>
         <input type="password" id="adminPin" inputmode="numeric" placeholder="Masukkan PIN apa saja — demo menerima semua PIN" autocomplete="off">
       </div>
@@ -215,6 +215,9 @@ th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertic
 <script>
 try{document.getElementById("todayDate").textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});}catch(e){}
 /* ================= DATA CONTOH ================= */
+var admins=[
+ {id:'A1',name:'Admin Demo',label:'Pengelola / Admin',pin:'',active:true}
+];
 var mentors=[
  {id:'M1',name:'Andi Prasetyo, S.Pd.',mapel:'Matematika',dob:'12 Mei 1990',wa:'0812-3456-7801'},
  {id:'M2',name:'Sari Wulandari, S.Pd.',mapel:'IPA',dob:'3 Agustus 1992',wa:'0812-3456-7802'},
@@ -279,6 +282,7 @@ var invoices=[
 
 /* ================= HELPERS ================= */
 function $(id){return document.getElementById(id)}
+function adminById(id){return admins.filter(function(a){return a.id===id})[0]}
 function mentorById(id){return mentors.filter(function(m){return m.id===id})[0]}
 function studentById(id){return students.filter(function(s){return s.id===id})[0]}
 function parentById(id){return parents.filter(function(p){return p.id===id})[0]}
@@ -303,7 +307,8 @@ function pickRole(r){
 function doLogin(){
   // DEMO: PIN apa pun diterima — tidak ada pemeriksaan PIN.
   if(curRole==='admin'){
-    session={role:'admin',name:'Admin Demo',label:'Pengelola / Admin'};
+    var adm=adminById($('adminSel').value) || admins[0];
+    session={role:'admin',name:adm.name,label:adm.label||'Pengelola / Admin',adminId:adm.id};
   } else if(curRole==='mentor'){
     var m=mentorById($('mentorSel').value);
     session={role:'mentor',name:m.name,label:'Mentor '+m.mapel,mentorId:m.id};
@@ -384,16 +389,100 @@ function renderAdminData(){
   +'<div><label for="nsRel">Hubungan dengan siswa</label><select id="nsRel"><option value="Ayah">Ayah</option><option value="Ibu">Ibu</option><option value="Kakak">Kakak</option><option value="Wali">Wali</option><option value="Lainnya">Lainnya</option></select></div></div>'
   +'<p class="hint">PIN orangtua adalah 4 digit terakhir nomor HP/WA orangtua yang terdaftar.</p>'
   +'<button class="btn" onclick="addStudent()">Tambah Siswa</button></div>'
-  +'<div class="card"><h3>🏫 Kelas</h3>'+ch+'</div>'
+  +'<div class="card"><h3>🏫 Kelas ('+classes.length+')</h3>'+ch
+  +'<h3 style="margin:22px 0 0">➕ Tambah Kelas</h3>'
+  +'<div class="grid2"><div><label for="nkName">Nama kelas / program</label><input type="text" id="nkName" placeholder="Contoh: Matematika — 8 SMP"></div>'
+  +'<div><label for="nkMentor">Mentor pengajar</label><select id="nkMentor">'+mentors.map(function(m){return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.mapel)+'</option>'}).join('')+'</select></div>'
+  +'<div><label for="nkJadwal">Jadwal</label><input type="text" id="nkJadwal" placeholder="Contoh: Senin &amp; Rabu · 15.30–17.00"></div></div>'
+  +'<label>Anggota — pilih siswa</label><div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px">'
+  + students.map(function(s){ return '<label style="display:flex;align-items:center;gap:8px;font-weight:600;margin:6px 0"><input type="checkbox" class="nk-member" value="'+s.id+'" style="width:18px;height:18px;min-height:auto"> '+esc(s.name)+' <span class="hint">('+esc(s.kelas)+')</span></label>'; }).join('')
+  +'</div><p class="hint">Centang satu atau lebih siswa sebagai anggota kelas. Kelas baru langsung tampil di daftar kelas dan bisa dipilih saat membuat pertemuan.</p>'
+  +'<button class="btn" onclick="addClass()">Tambah Kelas</button></div>'
   + pinSection();
 }
+var pinEditId=null;
+function activeAdminCount(){ return admins.filter(function(a){return a.active}).length; }
 function pinSection(){
   var mh=mentors.map(function(m){ return '<div class="att-row"><span><b>'+esc(m.name)+'</b> <span class="hint">('+esc(m.mapel)+')</span></span><span class="hint">PIN aktif · lahir '+esc(m.dob)+'</span></div>'; }).join('');
   var ph=parents.map(function(p){ var kids=students.filter(function(s){return s.parent===p.id}).map(function(s){return esc(s.name)}).join(', '); return '<div class="att-row"><span><b>'+esc(p.name)+'</b><br><span class="hint">'+kids+'</span></span><span class="hint">PIN aktif · WA '+esc(p.wa)+'</span></div>'; }).join('');
+  var curId=session && session.adminId ? session.adminId : (admins[0]&&admins[0].id);
+  var ah=admins.map(function(a){
+    var isLastActive = a.active && activeAdminCount()<=1;
+    var statusPill = a.active ? '<span class="pill lunas">Aktif</span>' : '<span class="pill belum">Nonaktif</span>';
+    var pinInfo = a.pin ? 'PIN sudah diatur' : 'PIN aktif';
+    var editForm='';
+    if(pinEditId===a.id){
+      editForm='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px"><label for="editPin-'+a.id+'">PIN baru untuk '+esc(a.name)+'</label><input type="password" id="editPin-'+a.id+'" inputmode="numeric" placeholder="Masukkan PIN baru" autocomplete="off"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn small" onclick="saveAdminPin(\''+a.id+'\')">Simpan PIN Baru</button><button class="btn small secondary" onclick="cancelEditAdminPin()">Batal</button></div></div>';
+    }
+    var actions='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
+      +'<button class="btn small secondary" onclick="startEditAdminPin(\''+a.id+'\')">Ganti PIN</button>'
+      +(a.active
+        ? '<button class="btn small secondary" '+(isLastActive?'disabled title="Admin aktif terakhir tidak bisa dinonaktifkan"':'')+' onclick="toggleAdminActive(\''+a.id+'\')">Nonaktifkan</button>'
+        : '<button class="btn small secondary" onclick="toggleAdminActive(\''+a.id+'\')">Aktifkan</button>')
+      +'<button class="btn small secondary" '+(isLastActive?'disabled title="Admin aktif terakhir tidak bisa dihapus"':'')+' onclick="deleteAdmin(\''+a.id+'\')">Hapus</button>'
+      +'</div>'
+      +(isLastActive?'<p class="hint" style="margin:6px 0 0">Admin aktif terakhir tidak bisa dinonaktifkan atau dihapus.</p>':'');
+    return '<div class="item"><h4>'+esc(a.name)+(a.id===curId?' <span class="hint">(Anda)</span>':'')+' '+statusPill+'</h4><p>'+esc(a.label||'Pengelola / Admin')+' · <span class="hint">'+pinInfo+'</span></p>'+actions+editForm+'</div>';
+  }).join('');
   return '<div class="card"><h3>🔐 PIN</h3>'
-  +'<p style="margin:4px 0"><b>Admin Demo</b> — Pengelola / Admin · <span class="hint">PIN aktif</span></p>'
-  +'<h4 style="margin:18px 0 4px">PIN Mentor</h4>'+mh
-  +'<h4 style="margin:18px 0 4px">PIN Orangtua</h4>'+ph+'</div>';
+  +'<h4 style="margin:6px 0 4px">Admin ('+admins.length+')</h4>'+ah
+  +'<h4 style="margin:20px 0 0">Ganti PIN Saya</h4>'
+  +'<div class="grid2"><div><label for="myOldPin">PIN lama</label><input type="password" id="myOldPin" inputmode="numeric" placeholder="Masukkan PIN lama Anda" autocomplete="off"></div>'
+  +'<div><label for="myNewPin">PIN baru</label><input type="password" id="myNewPin" inputmode="numeric" placeholder="Masukkan PIN baru" autocomplete="off"></div></div>'
+  +'<div style="height:10px"></div><button class="btn" onclick="changeMyPin()">Ganti PIN Saya</button>'
+  +'<h4 style="margin:22px 0 0">➕ Tambah Admin Baru</h4>'
+  +'<div class="grid2"><div><label for="naName">Nama Admin</label><input type="text" id="naName" placeholder="Contoh: Admin Kedua"></div>'
+  +'<div><label for="naPin">PIN</label><input type="password" id="naPin" inputmode="numeric" placeholder="Buat PIN untuk admin baru" autocomplete="off"></div></div>'
+  +'<div style="height:10px"></div><button class="btn" onclick="addAdmin()">Tambah Admin</button>'
+  +'<h4 style="margin:22px 0 4px">PIN Mentor</h4><p class="hint" style="margin:0 0 6px">Otomatis dari tanggal lahir mentor (format DDMMYY) — di sini hanya tampil statusnya.</p>'+mh
+  +'<h4 style="margin:18px 0 4px">PIN Orangtua</h4><p class="hint" style="margin:0 0 6px">Otomatis dari 4 digit terakhir nomor HP/WA orangtua yang terdaftar — di sini hanya tampil statusnya.</p>'+ph+'</div>';
+}
+function startEditAdminPin(id){ pinEditId=id; renderAdminData(); setTimeout(function(){ var el=$('editPin-'+id); if(el) el.focus(); },50); }
+function cancelEditAdminPin(){ pinEditId=null; renderAdminData(); }
+function saveAdminPin(id){
+  var el=$('editPin-'+id); var np=el?(el.value||'').trim():'';
+  if(!np){ toast('Isi PIN baru dulu.'); return; }
+  var a=adminById(id); if(!a) return;
+  a.pin=np; pinEditId=null;
+  toast('PIN '+a.name+' berhasil diganti.');
+  renderAdminData();
+}
+function changeMyPin(){
+  var oldEl=$('myOldPin'), newEl=$('myNewPin');
+  var op=oldEl?(oldEl.value||'').trim():'', np=newEl?(newEl.value||'').trim():'';
+  if(!op){ toast('Isi PIN lama dulu untuk mengganti PIN.'); return; }
+  if(!np){ toast('Isi PIN baru dulu.'); return; }
+  var cur=adminById(session.adminId) || admins[0];
+  if(cur && cur.pin && cur.pin!==op){ toast('PIN lama tidak cocok. Periksa kembali PIN lama Anda.'); return; }
+  if(cur) cur.pin=np;
+  toast('PIN Anda berhasil diganti.');
+  renderAdminData();
+}
+function addAdmin(){
+  var name=($('naName').value||'').trim(), pin=($('naPin').value||'').trim();
+  if(!name){ toast('Isi nama Admin baru dulu.'); return; }
+  if(!pin){ toast('Isi PIN untuk Admin baru dulu.'); return; }
+  admins.push({id:'A'+Date.now(),name:name,label:'Pengelola / Admin',pin:pin,active:true});
+  refreshLoginSelects();
+  toast('Admin '+name+' ditambahkan dan aktif — namanya langsung tampil di pilihan masuk Admin.');
+  renderAdminData();
+}
+function toggleAdminActive(id){
+  var a=adminById(id); if(!a) return;
+  if(a.active && activeAdminCount()<=1){ toast('Admin aktif terakhir tidak bisa dinonaktifkan.'); return; }
+  a.active=!a.active;
+  refreshLoginSelects();
+  toast(a.active ? ('Admin '+a.name+' diaktifkan kembali.') : ('Admin '+a.name+' dinonaktifkan — tidak tampil lagi di pilihan masuk Admin.'));
+  renderAdminData();
+}
+function deleteAdmin(id){
+  var a=adminById(id); if(!a) return;
+  if(a.active && activeAdminCount()<=1){ toast('Admin aktif terakhir tidak bisa dihapus.'); return; }
+  admins=admins.filter(function(x){return x.id!==id});
+  if(pinEditId===id) pinEditId=null;
+  refreshLoginSelects();
+  toast('Admin '+a.name+' dihapus.');
+  renderAdminData();
 }
 function fmtDob(v){
   var p=v.split('-'); if(p.length!==3) return v;
@@ -401,6 +490,7 @@ function fmtDob(v){
   return parseInt(p[2],10)+' '+bln[parseInt(p[1],10)-1]+' '+p[0];
 }
 function refreshLoginSelects(){
+  var as=$('adminSel'); if(as){ var av=as.value; var activeAdmins=admins.filter(function(a){return a.active}); as.innerHTML=activeAdmins.map(function(a){ return '<option value="'+a.id+'">'+esc(a.name)+' — '+(a.label||'Pengelola / Admin')+'</option>'; }).join(''); if(av && adminById(av) && adminById(av).active) as.value=av; }
   var ms=$('mentorSel'); var mv=ms.value;
   ms.innerHTML=mentors.map(function(m){ return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.mapel)+'</option>'; }).join('');
   if(mv && mentorById(mv)) ms.value=mv;
@@ -432,6 +522,18 @@ function addStudent(){
   students.push({id:'S'+Date.now(),name:name,kelas:kelas,parent:par.id,hubungan:rel});
   refreshLoginSelects();
   toast('Siswa '+name+' ditambahkan — langsung tampil di tabel Data Induk dan di pilihan masuk Orangtua.');
+  renderAdminData();
+}
+function addClass(){
+  var name=($('nkName').value||'').trim(), mentor=$('nkMentor').value, jadwal=($('nkJadwal').value||'').trim();
+  if(!name){ toast('Isi nama kelas / program dulu.'); return; }
+  if(!mentor){ toast('Pilih mentor pengajar dulu.'); return; }
+  if(!jadwal){ toast('Isi jadwal kelas dulu.'); return; }
+  var boxes=document.querySelectorAll('.nk-member'); var members=[];
+  for(var i=0;i<boxes.length;i++){ if(boxes[i].checked) members.push(boxes[i].value); }
+  if(!members.length){ toast('Pilih minimal satu siswa sebagai anggota kelas.'); return; }
+  classes.push({id:'K'+Date.now(),name:name,mentor:mentor,jadwal:jadwal,members:members});
+  toast('Kelas '+name+' ditambahkan dengan '+members.length+' anggota — langsung tampil di daftar kelas dan pilihan Buat Pertemuan.');
   renderAdminData();
 }
 
