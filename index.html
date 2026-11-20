@@ -65,7 +65,8 @@ button,select,input:not([type="radio"]){min-height:44px}
 .role-btn strong{display:block;font-size:1.05rem;margin:6px 0 2px}
 .role-btn span{color:var(--muted);font-size:.88rem}
 label{font-weight:700;font-size:.9rem;display:block;margin:12px 0 6px}
-input[type="text"],input[type="password"],input[type="date"],input[type="number"],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+input[type="text"],input[type="password"],input[type="date"],input[type="number"],input[type="file"],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+input[type="file"]{padding:8px 12px}
 textarea{min-height:74px;resize:vertical}
 .btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:12px 20px;font-weight:800;cursor:pointer;width:100%}
 .btn:hover{background:var(--teal-dark)}
@@ -264,16 +265,16 @@ var meetings=[
  {id:'T6',kelas:'K1',tanggal:'Rabu, 19 November 2026',mentorHadir:true,materi:'SPLDV — metode substitusi dan soal cerita',capaian:'Siswa dapat memodelkan soal cerita menjadi SPLDV.',pr:'Paket soal cerita SPLDV (5 soal)',kendala:'—',catatan:'Persiapan kuis SPLDV hari Senin depan.',att:{S1:'Hadir',S6:'Hadir',S9:'Hadir'},locked:true}
 ];
 var invoices=[
- {id:'INV1',student:'S1',periode:'November 2026',jumlah:350000,terbayar:350000},
- {id:'INV2',student:'S2',periode:'November 2026',jumlah:300000,terbayar:150000},
- {id:'INV3',student:'S3',periode:'November 2026',jumlah:300000,terbayar:0},
- {id:'INV4',student:'S4',periode:'November 2026',jumlah:250000,terbayar:250000},
- {id:'INV5',student:'S5',periode:'November 2026',jumlah:400000,terbayar:400000},
- {id:'INV6',student:'S6',periode:'November 2026',jumlah:350000,terbayar:175000},
- {id:'INV7',student:'S7',periode:'November 2026',jumlah:250000,terbayar:175000},
- {id:'INV8',student:'S8',periode:'November 2026',jumlah:400000,terbayar:0},
- {id:'INV9',student:'S9',periode:'November 2026',jumlah:300000,terbayar:300000},
- {id:'INV10',student:'S10',periode:'November 2026',jumlah:250000,terbayar:250000}
+ {id:'INV1',student:'S1',periode:'November 2026',jumlah:350000,terbayar:350000,payments:[{tanggal:'5 November 2026',jumlah:350000,cara:'Transfer',bukti:'bukti-transfer-rizky-nov.jpg'}]},
+ {id:'INV2',student:'S2',periode:'November 2026',jumlah:300000,terbayar:150000,payments:[{tanggal:'7 November 2026',jumlah:150000,cara:'Tunai',bukti:''}]},
+ {id:'INV3',student:'S3',periode:'November 2026',jumlah:300000,terbayar:0,payments:[]},
+ {id:'INV4',student:'S4',periode:'November 2026',jumlah:250000,terbayar:250000,payments:[{tanggal:'4 November 2026',jumlah:250000,cara:'Tunai',bukti:''}]},
+ {id:'INV5',student:'S5',periode:'November 2026',jumlah:400000,terbayar:400000,payments:[{tanggal:'6 November 2026',jumlah:400000,cara:'Transfer',bukti:'bukti-transfer-fajar-nov.jpg'}]},
+ {id:'INV6',student:'S6',periode:'November 2026',jumlah:350000,terbayar:175000,payments:[{tanggal:'8 November 2026',jumlah:175000,cara:'Transfer',bukti:'bukti-transfer-sabrina-nov.jpg'}]},
+ {id:'INV7',student:'S7',periode:'November 2026',jumlah:250000,terbayar:175000,payments:[{tanggal:'8 November 2026',jumlah:100000,cara:'Tunai',bukti:''},{tanggal:'15 November 2026',jumlah:75000,cara:'Tunai',bukti:''}]},
+ {id:'INV8',student:'S8',periode:'November 2026',jumlah:400000,terbayar:0,payments:[]},
+ {id:'INV9',student:'S9',periode:'November 2026',jumlah:300000,terbayar:300000,payments:[{tanggal:'5 November 2026',jumlah:300000,cara:'Tunai',bukti:''}]},
+ {id:'INV10',student:'S10',periode:'November 2026',jumlah:250000,terbayar:250000,payments:[{tanggal:'9 November 2026',jumlah:250000,cara:'Transfer',bukti:'bukti-transfer-luna-nov.jpg'}]}
 ];
 
 /* ================= HELPERS ================= */
@@ -489,7 +490,14 @@ function saveMeeting(id){
 }
 
 /* ================= TAGIHAN ADMIN ================= */
-var invFilterQ='', invFilterStatus='';
+var invFilterQ='', invFilterStatus='', payFormOpenId=null;
+function paymentHistoryHtml(inv,compact){
+  if(!inv.payments || !inv.payments.length) return '';
+  var rows=inv.payments.map(function(p,idx){
+    return '<div class="att-row"><span><b>'+rp(p.jumlah)+'</b> · '+esc(p.cara)+(p.bukti?' · 📎 '+esc(p.bukti):'')+'<br><span class="hint">'+esc(p.tanggal)+'</span></span><span class="hint">'+(idx===0&&inv.payments.length===1?'Pembayaran':'Cicilan ke-'+(idx+1))+'</span></div>';
+  }).join('');
+  return '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px"><p style="margin:0 0 4px"><b>Riwayat pembayaran</b></p>'+rows+'</div>';
+}
 function renderAdminInvoices(){
   var rows=invoices.filter(function(inv){
     var s=studentById(inv.student); var st=invStatus(inv)[0];
@@ -497,11 +505,29 @@ function renderAdminInvoices(){
   }).map(function(inv){
     var s=studentById(inv.student), st=invStatus(inv);
     var sisa=inv.jumlah-inv.terbayar;
+    var isOpen = payFormOpenId===inv.id;
+    var formHtml='';
+    if(sisa>0 && isOpen){
+      formHtml='<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">'
+        +'<label for="payAmt-'+inv.id+'">Jumlah bayar (Rp)</label>'
+        +'<input type="number" id="payAmt-'+inv.id+'" value="'+sisa+'" min="1" max="'+sisa+'" step="1000">'
+        +'<p class="hint" style="margin:6px 0 0">Sisa tagihan saat ini <b>'+rp(sisa)+'</b>. Isi lebih kecil dari sisa untuk bayar cicil (sebagian), atau isi penuh untuk melunasi.</p>'
+        +'<label for="payCara-'+inv.id+'">Cara bayar</label>'
+        +'<select id="payCara-'+inv.id+'" onchange="toggleBukti(\''+inv.id+'\')"><option value="Tunai">Tunai</option><option value="Transfer">Transfer</option></select>'
+        +'<div id="buktiWrap-'+inv.id+'" class="hidden"><label for="payBukti-'+inv.id+'">Bukti transfer (bila transfer)</label><input type="file" id="payBukti-'+inv.id+'" accept="image/*,.pdf"><p class="hint" style="margin:6px 0 0">Pilih foto atau berkas bukti transfer dari perangkat Anda — boleh dikosongkan.</p></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn small" onclick="recordPayment(\''+inv.id+'\')">Simpan Pembayaran</button><button class="btn small secondary" onclick="fillLunas(\''+inv.id+'\','+sisa+')">Isi Lunas ('+rp(sisa)+')</button><button class="btn small secondary" onclick="togglePayForm(\''+inv.id+'\')">Batal</button></div>'
+        +'</div>';
+    }
+    var actionHtml = sisa>0
+      ? (isOpen ? '' : '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" onclick="togglePayForm(\''+inv.id+'\')">💵 Catat Pembayaran</button></div>')
+      : '<p style="margin-top:8px">✅ Lunas — tidak ada sisa tagihan.</p>';
     return '<div class="item"><h4>'+esc(s.name)+' <span class="hint">('+esc(s.kelas)+' · '+esc(parentById(s.parent).name)+')</span> <span class="pill '+st[1]+'">'+st[0]+'</span></h4>'
-      +'<p>Periode '+esc(inv.periode)+' · Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b>'+(sisa>0?' · Sisa <b>'+rp(sisa)+'</b>':'')+'</p>'
-      +(sisa>0?'<button class="btn small" onclick="payInvoice(\''+inv.id+'\')">💵 Catat Lunas</button>':'<p>✅ Lunas</p>')+'</div>';
+      +'<p>Periode '+esc(inv.periode)+' · Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b> · Sisa <b>'+rp(sisa)+'</b></p>'
+      + paymentHistoryHtml(inv)
+      + actionHtml + formHtml +'</div>';
   }).join('');
   $('tabContent').innerHTML='<div class="card"><h3>🧾 Tagihan Siswa — November 2026</h3>'
+   +'<p class="hint" style="margin-top:0">Catat pembayaran dengan jumlah berapa pun — cicilan atau lunas. Status dan sisa tagihan berubah otomatis setelah pembayaran disimpan.</p>'
    +'<label>Cari nama siswa</label><input type="text" placeholder="Ketik 1–3 huruf nama siswa…" value="'+esc(invFilterQ)+'" oninput="invFilterQ=this.value.toLowerCase();renderAdminInvoicesKeep(this)">'
    +'<label>Saring status</label><select onchange="invFilterStatus=this.value;renderAdminInvoices()"><option value="">Semua status</option><option'+(invFilterStatus==='Lunas'?' selected':'')+'>Lunas</option><option'+(invFilterStatus==='Sebagian'?' selected':'')+'>Sebagian</option><option'+(invFilterStatus==='Belum Bayar'?' selected':'')+'>Belum Bayar</option></select>'
    +'<div style="height:12px"></div>'+(rows||'<p class="hint">Belum ada tagihan pada saringan ini.</p>')+'</div>'
@@ -511,8 +537,31 @@ function renderAdminInvoicesKeep(input){
   var pos=input.selectionStart; renderAdminInvoices();
   var el=document.querySelector('#tabContent input[type="text"]'); if(el){ el.focus(); el.setSelectionRange(pos,pos); }
 }
-function payInvoice(id){ var inv=invoices.filter(function(x){return x.id===id})[0]; inv.terbayar=inv.jumlah; toast('Pembayaran dicatat — tagihan '+studentById(inv.student).name+' kini Lunas.'); renderAdminInvoices(); }
-function addInvoice(){ var sid=$('newInvStudent').value, amt=parseInt($('newInvAmt').value||'0',10); if(!(amt>0)){ toast('Isi jumlah tagihan yang benar.'); return; } invoices.push({id:'INV'+Date.now(),student:sid,periode:'November 2026',jumlah:amt,terbayar:0}); toast('Tagihan baru dibuat untuk '+studentById(sid).name+'.'); renderAdminInvoices(); }
+function togglePayForm(id){ payFormOpenId = (payFormOpenId===id ? null : id); renderAdminInvoices(); }
+function toggleBukti(id){ var sel=$('payCara-'+id); var wrap=$('buktiWrap-'+id); if(!sel||!wrap) return; wrap.classList.toggle('hidden', sel.value!=='Transfer'); }
+function fillLunas(id,sisa){ var el=$('payAmt-'+id); if(el){ el.value=sisa; el.focus(); } }
+function todayLabel(){ try{ return new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ return 'Hari ini'; } }
+function recordPayment(id){
+  var inv=invoices.filter(function(x){return x.id===id})[0]; if(!inv) return;
+  var sisa=inv.jumlah-inv.terbayar;
+  var amtEl=$('payAmt-'+id); var amt=parseInt((amtEl&&amtEl.value)||'0',10);
+  if(!(amt>0)){ toast('Isi jumlah bayar yang benar — lebih dari Rp0.'); return; }
+  if(amt>sisa){ toast('Jumlah bayar melebihi sisa tagihan ('+rp(sisa)+'). Kurangi jumlahnya.'); return; }
+  var caraEl=$('payCara-'+id); var cara=caraEl?caraEl.value:'Tunai';
+  var bukti='';
+  if(cara==='Transfer'){ var fEl=$('payBukti-'+id); if(fEl && fEl.files && fEl.files.length){ bukti=fEl.files[0].name; } }
+  if(!inv.payments) inv.payments=[];
+  inv.payments.push({tanggal:todayLabel(),jumlah:amt,cara:cara,bukti:bukti});
+  inv.terbayar+=amt;
+  var sisaBaru=inv.jumlah-inv.terbayar; var st=invStatus(inv)[0];
+  payFormOpenId=null;
+  if(sisaBaru<=0){ toast('Pembayaran '+rp(amt)+' ('+cara+') dicatat — tagihan '+studentById(inv.student).name+' kini Lunas.'); }
+  else { toast('Pembayaran cicilan '+rp(amt)+' ('+cara+') dicatat — status Sebagian, sisa '+rp(sisaBaru)+'.'); }
+  renderAdminInvoices();
+}
+/* Kompatibilitas: nama lama tidak dipakai lagi — pencatatan kini lewat formulir pembayaran di atas. */
+function payInvoice(id){ togglePayForm(id); }
+function addInvoice(){ var sid=$('newInvStudent').value, amt=parseInt($('newInvAmt').value||'0',10); if(!(amt>0)){ toast('Isi jumlah tagihan yang benar.'); return; } invoices.push({id:'INV'+Date.now(),student:sid,periode:'November 2026',jumlah:amt,terbayar:0,payments:[]}); toast('Tagihan baru dibuat untuk '+studentById(sid).name+'.'); renderAdminInvoices(); }
 
 /* ================= ORANGTUA ================= */
 function siblings(){ return students.filter(function(s){return s.parent===session.parentId}); }
@@ -548,7 +597,7 @@ function renderOrtuInvoices(){
   siblings().forEach(function(s){
     var rows=invoices.filter(function(i){return i.student===s.id}).map(function(inv){
       var st=invStatus(inv); var sisa=inv.jumlah-inv.terbayar;
-      return '<div class="item"><h4>'+esc(inv.periode)+' <span class="pill '+st[1]+'">'+st[0]+'</span></h4><p>Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b>'+(sisa>0?' · Sisa <b>'+rp(sisa)+'</b>':'')+'</p><p class="hint">Pembayaran dicatat manual oleh Pengelola (transfer / tunai) — hubungi Pengelola bila sudah membayar.</p></div>';
+      return '<div class="item"><h4>'+esc(inv.periode)+' <span class="pill '+st[1]+'">'+st[0]+'</span></h4><p>Tagihan <b>'+rp(inv.jumlah)+'</b> · Terbayar <b>'+rp(inv.terbayar)+'</b> · Sisa <b>'+rp(sisa)+'</b></p>'+paymentHistoryHtml(inv)+'<p class="hint">Pembayaran dicatat oleh Pengelola (tunai / transfer, bisa cicilan) — hubungi Pengelola bila sudah membayar.</p></div>';
     }).join('');
     html+='<div class="card"><h3>🧾 Tagihan '+esc(s.name)+'</h3>'+(rows||'<p class="hint">Belum ada tagihan.</p>')+'</div>';
   });
