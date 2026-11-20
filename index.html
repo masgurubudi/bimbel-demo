@@ -593,6 +593,25 @@ function saveMeeting(id){
 
 /* ================= TAGIHAN ADMIN ================= */
 var invFilterQ='', invFilterStatus='', payFormOpenId=null;
+function parseTanggalID(s){
+  if(!s) return 0;
+  var bln={'januari':0,'februari':1,'maret':2,'april':3,'mei':4,'juni':5,'juli':6,'agustus':7,'september':8,'oktober':9,'november':10,'desember':11};
+  var m=String(s).toLowerCase().match(/(\d{1,2})\s+([a-z]+)\s+(\d{4})/);
+  if(!m) return 0;
+  var mo=bln[m[2]]; if(mo===undefined) return 0;
+  return new Date(parseInt(m[3],10), mo, parseInt(m[1],10)).getTime();
+}
+function lastPaymentTime(inv){
+  if(!inv.payments || !inv.payments.length) return 0;
+  var t=0; inv.payments.forEach(function(p){ var pt=parseTanggalID(p.tanggal); if(pt>t) t=pt; });
+  return t;
+}
+function lastPayment(inv){
+  if(!inv.payments || !inv.payments.length) return null;
+  var best=inv.payments[0], bt=parseTanggalID(best.tanggal);
+  inv.payments.forEach(function(p){ var pt=parseTanggalID(p.tanggal); if(pt>=bt){ bt=pt; best=p; } });
+  return best;
+}
 function paymentHistoryHtml(inv,compact){
   if(!inv.payments || !inv.payments.length) return '';
   var rows=inv.payments.map(function(p,idx){
@@ -600,11 +619,23 @@ function paymentHistoryHtml(inv,compact){
   }).join('');
   return '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px"><p style="margin:0 0 4px"><b>Riwayat pembayaran</b></p>'+rows+'</div>';
 }
+function clearInvFilter(){ invFilterQ=''; invFilterStatus=''; payFormOpenId=null; renderAdminInvoices(); }
 function renderAdminInvoices(){
-  var rows=invoices.filter(function(inv){
-    var s=studentById(inv.student); var st=invStatus(inv)[0];
-    return (invFilterQ===''||s.name.toLowerCase().indexOf(invFilterQ)>-1) && (invFilterStatus===''||st===invFilterStatus);
-  }).map(function(inv){
+  var isDefault = (invFilterQ==='' && invFilterStatus==='');
+  var filtered;
+  if(isDefault){
+    var paid=invoices.filter(function(inv){ return inv.payments && inv.payments.length; });
+    if(paid.length){
+      var maxT=0; paid.forEach(function(inv){ var t=lastPaymentTime(inv); if(t>maxT) maxT=t; });
+      filtered=paid.filter(function(inv){ return lastPaymentTime(inv)===maxT; });
+    } else { filtered=[]; }
+  } else {
+    filtered=invoices.filter(function(inv){
+      var s=studentById(inv.student); var st=invStatus(inv)[0];
+      return (invFilterQ===''||s.name.toLowerCase().indexOf(invFilterQ)>-1) && (invFilterStatus===''||st===invFilterStatus);
+    });
+  }
+  var rows=filtered.map(function(inv){
     var s=studentById(inv.student), st=invStatus(inv);
     var sisa=inv.jumlah-inv.terbayar;
     var isOpen = payFormOpenId===inv.id;
@@ -628,12 +659,30 @@ function renderAdminInvoices(){
       + paymentHistoryHtml(inv)
       + actionHtml + formHtml +'</div>';
   }).join('');
-  $('tabContent').innerHTML='<div class="card"><h3>🧾 Tagihan Siswa — November 2026</h3>'
-   +'<p class="hint" style="margin-top:0">Catat pembayaran dengan jumlah berapa pun — cicilan atau lunas. Status dan sisa tagihan berubah otomatis setelah pembayaran disimpan.</p>'
+  var infoHtml='';
+  var emptyHtml='';
+  if(isDefault){
+    if(filtered.length){
+      var lp=lastPayment(filtered[0]);
+      var lps=studentById(filtered[0].student);
+      infoHtml='<p class="hint" style="margin-top:0">Menampilkan <b>pembayaran terakhir</b> saja agar halaman tetap ringkas: <b>'+esc(lps.name)+'</b>'+(lp?' — '+esc(lp.tanggal)+' · '+rp(lp.jumlah)+' ('+esc(lp.cara)+')':'')+'. Untuk melihat tagihan siswa lain, gunakan <b>Cari nama siswa</b> atau <b>Saring status</b> di bawah.</p>';
+      emptyHtml='<p class="hint">Belum ada tagihan pada saringan ini.</p>';
+    } else {
+      infoHtml='<p class="hint" style="margin-top:0">Belum ada pembayaran yang tercatat, jadi belum ada pembayaran terakhir untuk ditampilkan. Gunakan <b>Cari nama siswa</b> atau <b>Saring status</b> di bawah untuk melihat tagihan siswa.</p>';
+      emptyHtml='<p class="hint">Belum ada pembayaran tercatat.</p>';
+    }
+  } else {
+    infoHtml='<p class="hint" style="margin-top:0">Menampilkan <b>'+filtered.length+' tagihan</b> sesuai pencarian / saringan Anda. <button class="btn small secondary" style="margin-left:6px" onclick="clearInvFilter()">Kembali ke pembayaran terakhir</button></p>';
+    emptyHtml='<p class="hint">Tidak ada tagihan yang cocok dengan pencarian / saringan ini. Coba kata kunci atau status lain, atau kembali ke pembayaran terakhir.</p>';
+  }
+  var buatTagihanCard='<div class="card"><h3>➕ Buat Tagihan Baru</h3><label>Siswa</label><select id="newInvStudent">'+students.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'}).join('')+'</select><label>Jumlah (Rp)</label><input type="number" id="newInvAmt" value="300000" min="0" step="1000"><div style="height:12px"></div><button class="btn" onclick="addInvoice()">Buat Tagihan November 2026</button></div>';
+  $('tabContent').innerHTML=buatTagihanCard
+   +'<div class="card"><h3>🧾 Tagihan Siswa — November 2026</h3>'
+   + infoHtml
+   +'<p class="hint">Catat pembayaran dengan jumlah berapa pun — cicilan atau lunas. Status dan sisa tagihan berubah otomatis setelah pembayaran disimpan.</p>'
    +'<label>Cari nama siswa</label><input type="text" placeholder="Ketik 1–3 huruf nama siswa…" value="'+esc(invFilterQ)+'" oninput="invFilterQ=this.value.toLowerCase();renderAdminInvoicesKeep(this)">'
    +'<label>Saring status</label><select onchange="invFilterStatus=this.value;renderAdminInvoices()"><option value="">Semua status</option><option'+(invFilterStatus==='Lunas'?' selected':'')+'>Lunas</option><option'+(invFilterStatus==='Sebagian'?' selected':'')+'>Sebagian</option><option'+(invFilterStatus==='Belum Bayar'?' selected':'')+'>Belum Bayar</option></select>'
-   +'<div style="height:12px"></div>'+(rows||'<p class="hint">Belum ada tagihan pada saringan ini.</p>')+'</div>'
-   +'<div class="card"><h3>➕ Buat Tagihan Baru</h3><label>Siswa</label><select id="newInvStudent">'+students.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+' — '+esc(s.kelas)+'</option>'}).join('')+'</select><label>Jumlah (Rp)</label><input type="number" id="newInvAmt" value="300000" min="0" step="1000"><div style="height:12px"></div><button class="btn" onclick="addInvoice()">Buat Tagihan November 2026</button></div>';
+   +'<div style="height:12px"></div>'+(rows||emptyHtml)+'</div>';
 }
 function renderAdminInvoicesKeep(input){
   var pos=input.selectionStart; renderAdminInvoices();
@@ -657,13 +706,14 @@ function recordPayment(id){
   inv.terbayar+=amt;
   var sisaBaru=inv.jumlah-inv.terbayar; var st=invStatus(inv)[0];
   payFormOpenId=null;
+  invFilterQ=''; invFilterStatus='';
   if(sisaBaru<=0){ toast('Pembayaran '+rp(amt)+' ('+cara+') dicatat — tagihan '+studentById(inv.student).name+' kini Lunas.'); }
   else { toast('Pembayaran cicilan '+rp(amt)+' ('+cara+') dicatat — status Sebagian, sisa '+rp(sisaBaru)+'.'); }
   renderAdminInvoices();
 }
 /* Kompatibilitas: nama lama tidak dipakai lagi — pencatatan kini lewat formulir pembayaran di atas. */
 function payInvoice(id){ togglePayForm(id); }
-function addInvoice(){ var sid=$('newInvStudent').value, amt=parseInt($('newInvAmt').value||'0',10); if(!(amt>0)){ toast('Isi jumlah tagihan yang benar.'); return; } invoices.push({id:'INV'+Date.now(),student:sid,periode:'November 2026',jumlah:amt,terbayar:0,payments:[]}); toast('Tagihan baru dibuat untuk '+studentById(sid).name+'.'); renderAdminInvoices(); }
+function addInvoice(){ var sid=$('newInvStudent').value, amt=parseInt($('newInvAmt').value||'0',10); if(!(amt>0)){ toast('Isi jumlah tagihan yang benar.'); return; } invoices.push({id:'INV'+Date.now(),student:sid,periode:'November 2026',jumlah:amt,terbayar:0,payments:[]}); invFilterQ=studentById(sid).name.toLowerCase(); invFilterStatus=''; toast('Tagihan baru dibuat untuk '+studentById(sid).name+' — ditampilkan di bawah lewat pencarian namanya.'); renderAdminInvoices(); }
 
 /* ================= ORANGTUA ================= */
 function siblings(){ return students.filter(function(s){return s.parent===session.parentId}); }
